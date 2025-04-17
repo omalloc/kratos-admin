@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package api.console.administration;
+
+option go_package = "github.com/omalloc/kratos-console/api/console/administration;administration";
+option java_multiple_files = true;
+option java_package = "api.console.administration";
+
+import "google/api/annotations.proto";
+import "protobuf/pagination.proto";
+
+service Permission {
+	rpc CreatePermission (CreatePermissionRequest) returns (CreatePermissionReply){
+		option (google.api.http) = {
+			post: "/api/console/permission"
+			body: "*"
+		};
+	}
+	rpc UpdatePermission (UpdatePermissionRequest) returns (UpdatePermissionReply){
+		option (google.api.http) = {
+			put: "/api/console/permission/{id}"
+			body: "*"
+		};
+	}
+	rpc DeletePermission (DeletePermissionRequest) returns (DeletePermissionReply){
+		option (google.api.http) = {
+			delete: "/api/console/permission/{id}"
+		};
+	}	
+	rpc GetPermission (GetPermissionRequest) returns (GetPermissionReply){
+		option (google.api.http).get = "/api/console/permission/{id}";
+	}
+	rpc ListPermission (ListPermissionRequest) returns (ListPermissionReply){
+		option (google.api.http).get = "/api/console/permission";
+	}
+}
+
+enum PermissionStatus {
+	PERMISSION_STATUS_UNSPECIFIED = 0;
+	PERMISSION_STATUS_ENABLED = 1;
+	PERMISSION_STATUS_DISABLED = 2;
+}
+
+message Action {
+	string key = 1;
+	string describe = 2;
+	bool checked = 3;
+}
+
+message PermissionInfo {
+	int64 id = 1;
+	string name = 2;
+	string alias = 3;
+	string describe = 4;
+	repeated Action actions = 5;
+	PermissionStatus status = 6;
+}
+
+message CreatePermissionRequest {
+	string name = 1;
+	string alias = 2;
+	string describe = 3;
+	repeated Action actions = 4;
+	PermissionStatus status = 5;
+}
+message CreatePermissionReply {}
+
+message UpdatePermissionRequest {
+	int64 id = 1;
+	string name = 2;
+	string alias = 3;
+	string describe = 4;
+	repeated Action actions = 5;
+	PermissionStatus status = 6;
+}
+message UpdatePermissionReply {}
+
+message DeletePermissionRequest {
+	int64 id = 1;
+}
+message DeletePermissionReply {}
+
+message GetPermissionRequest {
+	int64 id = 1;
+}
+message GetPermissionReply {
+	string name = 1;
+	string alias = 2;
+	string describe = 3;
+	repeated Action actions = 4;
+	PermissionStatus status = 5;
+}
+
+message ListPermissionRequest {
+	protobuf.Pagination pagination = 1;
+	string name = 2;
+	string alias = 3;
+	PermissionStatus status = 4;
+}
+
+message ListPermissionReply {
+	repeated PermissionInfo data = 1;
+	protobuf.Pagination pagination = 2;
+}

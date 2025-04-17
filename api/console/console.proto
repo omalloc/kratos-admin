@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package api.console;
+
+option go_package = "github.com/omalloc/kratos-console/api/console;console";
+option java_multiple_files = true;
+option java_package = "api.console";
+
+import "openapi/v3/annotations.proto";
+
+option (openapi.v3.document) = {
+  info: {
+    title: "Go-Kratos Console API";
+    version: "1.0.0";
+    description: "Management console for Go-Kratos";
+    contact: {
+      name: "Sendya";
+      url: "https://github.com/sendya";
+      email: "yladmxa@gmail.com";
+    }
+    license: {
+      name: "Apache License";
+      url: "https://github.com/google/gnostic/blob/master/LICENSE";
+    }
+  }
+  components: {
+    security_schemes: {
+      additional_properties: [
+        {
+          name: "ApiKeyAuth";
+          value: {
+            security_scheme: {
+              type: "apiKey";
+              in: "header";
+              name: "Authorization";
+            }
+          }
+        }
+      ]
+    }
+  }
+};
+
+
+service Console {
+
+}

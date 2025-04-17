@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+package api.console.administration;
+
+option go_package = "github.com/omalloc/kratos-console/api/console/administration;administration";
+option java_multiple_files = true;
+option java_package = "api.console.administration";
+
+import "google/api/annotations.proto";
+import "protobuf/pagination.proto";
+import "console/administration/role.proto";
+
+service User {
+	rpc CreateUser (CreateUserRequest) returns (CreateUserReply) {
+		option (google.api.http) = {
+			post: "/api/console/user"
+			body: "*"
+		};
+	};
+	rpc UpdateUser (UpdateUserRequest) returns (UpdateUserReply) {
+		option (google.api.http) = {
+			put: "/api/console/user/{id}"
+			body: "*"
+		};
+	};
+	rpc DeleteUser (DeleteUserRequest) returns (DeleteUserReply) {
+		option (google.api.http).delete = "/api/console/user/{id}";
+	}
+	rpc GetUser (GetUserRequest) returns (GetUserReply) {
+		option (google.api.http).get = "/api/console/user/{id}";
+	}
+	rpc ListUser (ListUserRequest) returns (ListUserReply) {
+		option (google.api.http).get = "/api/console/user";
+	}
+
+	rpc BindNamespace (BindNamespaceRequest) returns (BindNamespaceReply) {
+		option (google.api.http) = {
+			post: "/api/console/user/{id}/namespace"
+			body: "*"
+		};
+	}
+	rpc UnbindNamespace (UnbindNamespaceRequest) returns (UnbindNamespaceReply) {
+		option (google.api.http) = {
+			delete: "/api/console/user/{id}/namespace/{namespace_id}"
+		};
+	}
+	rpc BindRole (BindRoleRequest) returns (BindRoleReply) {
+		option (google.api.http) = {
+			post: "/api/console/user/{id}/role"
+			body: "*"
+		};
+	}
+	rpc UnbindRole (UnbindRoleRequest) returns (UnbindRoleReply) {
+		option (google.api.http) = {
+			delete: "/api/console/user/{id}/role/{role_id}"
+		};
+	}
+}
+
+enum UserStatus {
+	// 未定义
+	UNKNOWN = 0;
+	// 正常
+	NORMAL = 1;
+	// 禁用
+	DISABLED = 2;
+	// 删除
+	DELETED = 3;
+}
+
+message UserInfo {
+	int64 id = 1;
+	string username = 2;
+	string email = 3;
+	string nickname = 4;
+	string avatar = 5;
+	UserStatus status = 6;
+	string created_at = 7;
+	string updated_at = 8;
+	repeated int64 role_ids = 10;
+}
+
+message CreateUserRequest {
+	string username = 1;
+	string password = 2;
+	string re_password = 3;
+	string email = 4;
+	string nickname = 5;
+	int64 role_id = 6;
+	repeated string omit_perm = 7;
+}
+
+message CreateUserReply {
+	int64 id = 1;
+}
+
+message UpdateUserRequest {
+	int64 id = 1;
+	string email = 2;
+	string nickname = 3;
+	string password = 4;
+	string re_password = 5;
+	UserStatus status = 6;
+}
+message UpdateUserReply {}
+
+message DeleteUserRequest {
+	int64 id = 1;
+}
+message DeleteUserReply {}
+
+message GetUserRequest {
+	int64 id = 1;
+}
+message GetUserReply {
+	UserInfo user = 1;
+	int64 role_id = 2;
+}
+
+message ListUserRequest {
+	protobuf.Pagination pagination = 1;
+}
+message ListUserReply {
+	protobuf.Pagination pagination = 1;
+	repeated UserInfo data = 2;
+}
+
+message BindNamespaceRequest {
+	int64 id = 1;
+	int64 namespace_id = 2;
+}
+message BindNamespaceReply {}
+
+message BindRoleRequest {
+	int64 id = 1;
+	int64 role_id = 2;
+}
+message BindRoleReply {}
+
+message UnbindNamespaceRequest {
+	int64 id = 1;
+	int64 namespace_id = 2;
+}
+message UnbindNamespaceReply {}
+
+message UnbindRoleRequest {
+	int64 id = 1;
+	int64 role_id = 2;
+}
+message UnbindRoleReply {}

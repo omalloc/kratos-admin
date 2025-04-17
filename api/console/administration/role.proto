@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package api.console.administration;
+
+option go_package = "github.com/omalloc/kratos-console/api/console/administration;administration";
+option java_multiple_files = true;
+option java_package = "api.console.administration";
+
+import "google/api/annotations.proto";
+import "protobuf/pagination.proto";
+import "console/administration/permission.proto";
+
+service Role {
+	rpc CreateRole (CreateRoleRequest) returns (CreateRoleReply) {
+		option (google.api.http) = {
+			post: "/api/console/role"
+			body: "*"
+		};
+	}
+	rpc UpdateRole (UpdateRoleRequest) returns (UpdateRoleReply) {
+		option (google.api.http) = {
+			put: "/api/console/role/{id}",
+			body: "*"
+		};
+	}
+	rpc DeleteRole (DeleteRoleRequest) returns (DeleteRoleReply) {
+		option (google.api.http) = {
+			delete: "/api/console/role/{id}"
+		};
+	}
+	rpc GetRole (GetRoleRequest) returns (GetRoleReply) {
+		option (google.api.http) = {
+			get: "/api/console/role/{id}"
+		};
+	}
+	rpc ListRole (ListRoleRequest) returns (ListRoleReply) {
+		option (google.api.http).get = "/api/console/role";
+	}
+	rpc BindPermission (BindPermissionRequest) returns (BindPermissionReply) {
+		option (google.api.http) = {
+			put: "/api/console/role/{id}/permission"
+			body: "*"
+		};
+	}
+	rpc UnbindPermission (UnbindPermissionRequest) returns (UnbindPermissionReply) {
+		option (google.api.http) = {
+			put: "/api/console/role/{id}/permission/{permission_id}"
+			body: "*"
+		};
+	}
+}
+
+message RoleInfo {
+	int64 id = 1;
+	string name = 2;
+	string describe = 3;
+	int32 status = 4;
+	repeated Action actions = 5;
+	repeated Action data_access = 6;
+}
+
+message CreateRoleRequest {
+	string name = 1;
+	string describe = 2;
+	int32 status = 3;
+}
+message CreateRoleReply {}
+
+message UpdateRoleRequest {
+	int64 id = 1;
+	string name = 2;
+	string describe = 3;
+	int32 status = 4;
+}
+message UpdateRoleReply {}
+
+message DeleteRoleRequest {
+	int64 id = 1;
+}
+message DeleteRoleReply {}
+
+message GetRoleRequest {
+	int64 id = 1;
+}
+message GetRoleReply {
+	string name = 1;
+	string describe = 2;
+	int32 status = 3;
+	repeated Action actions = 4;
+	repeated Action data_access = 5;
+}
+
+message ListRoleRequest {
+	protobuf.Pagination pagination = 1;
+}
+
+message ListRoleReply {
+	protobuf.Pagination pagination = 1;
+	repeated RoleInfo data = 2;
+}
+
+message BindPermissionRequest {
+	int64 id = 1;
+	int64 permission_id = 2;
+	repeated Action actions = 3;
+	repeated Action data_access = 4;
+}
+message BindPermissionReply {}
+
+message UnbindPermissionRequest {
+	int64 id = 1;
+	int64 permission_id = 2;
+}
+message UnbindPermissionReply {}

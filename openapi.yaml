@@ -1,0 +1,836 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: Go-Kratos Console API
+    description: Management console for Go-Kratos
+    contact:
+        name: Sendya
+        url: https://github.com/sendya
+        email: yladmxa@gmail.com
+    license:
+        name: Apache License
+        url: https://github.com/google/gnostic/blob/master/LICENSE
+    version: 1.0.0
+paths:
+    /api/console/permission:
+        get:
+            tags:
+                - Permission
+            operationId: Permission_ListPermission
+            parameters:
+                - name: pagination.current
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.page_size
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.total
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.raw_total
+                  in: query
+                  schema:
+                    type: string
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: alias
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.ListPermissionReply'
+        post:
+            tags:
+                - Permission
+            operationId: Permission_CreatePermission
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.CreatePermissionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.CreatePermissionReply'
+    /api/console/permission/{id}:
+        get:
+            tags:
+                - Permission
+            operationId: Permission_GetPermission
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.GetPermissionReply'
+        put:
+            tags:
+                - Permission
+            operationId: Permission_UpdatePermission
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.UpdatePermissionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.UpdatePermissionReply'
+        delete:
+            tags:
+                - Permission
+            operationId: Permission_DeletePermission
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.DeletePermissionReply'
+    /api/console/role:
+        get:
+            tags:
+                - Role
+            operationId: Role_ListRole
+            parameters:
+                - name: pagination.current
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.page_size
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.total
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.raw_total
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.ListRoleReply'
+        post:
+            tags:
+                - Role
+            operationId: Role_CreateRole
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.CreateRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.CreateRoleReply'
+    /api/console/role/{id}:
+        get:
+            tags:
+                - Role
+            operationId: Role_GetRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.GetRoleReply'
+        put:
+            tags:
+                - Role
+            operationId: Role_UpdateRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.UpdateRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.UpdateRoleReply'
+        delete:
+            tags:
+                - Role
+            operationId: Role_DeleteRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.DeleteRoleReply'
+    /api/console/role/{id}/permission:
+        put:
+            tags:
+                - Role
+            operationId: Role_BindPermission
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.BindPermissionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.BindPermissionReply'
+    /api/console/role/{id}/permission/{permission_id}:
+        put:
+            tags:
+                - Role
+            operationId: Role_UnbindPermission
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: permission_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.UnbindPermissionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.UnbindPermissionReply'
+    /api/console/user:
+        get:
+            tags:
+                - User
+            operationId: User_ListUser
+            parameters:
+                - name: pagination.current
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.page_size
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.total
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.raw_total
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.ListUserReply'
+        post:
+            tags:
+                - User
+            operationId: User_CreateUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.CreateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.CreateUserReply'
+    /api/console/user/{id}:
+        get:
+            tags:
+                - User
+            operationId: User_GetUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.GetUserReply'
+        put:
+            tags:
+                - User
+            operationId: User_UpdateUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.UpdateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.UpdateUserReply'
+        delete:
+            tags:
+                - User
+            operationId: User_DeleteUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.DeleteUserReply'
+    /api/console/user/{id}/namespace:
+        post:
+            tags:
+                - User
+            operationId: User_BindNamespace
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.BindNamespaceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.BindNamespaceReply'
+    /api/console/user/{id}/namespace/{namespace_id}:
+        delete:
+            tags:
+                - User
+            operationId: User_UnbindNamespace
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: namespace_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.UnbindNamespaceReply'
+    /api/console/user/{id}/role:
+        post:
+            tags:
+                - User
+            operationId: User_BindRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.BindRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.BindRoleReply'
+    /api/console/user/{id}/role/{role_id}:
+        delete:
+            tags:
+                - User
+            operationId: User_UnbindRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: role_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.UnbindRoleReply'
+components:
+    schemas:
+        api.console.administration.Action:
+            type: object
+            properties:
+                key:
+                    type: string
+                describe:
+                    type: string
+                checked:
+                    type: boolean
+        api.console.administration.BindNamespaceReply:
+            type: object
+            properties: {}
+        api.console.administration.BindNamespaceRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                namespace_id:
+                    type: string
+        api.console.administration.BindPermissionReply:
+            type: object
+            properties: {}
+        api.console.administration.BindPermissionRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                permission_id:
+                    type: string
+                actions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.Action'
+                data_access:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.Action'
+        api.console.administration.BindRoleReply:
+            type: object
+            properties: {}
+        api.console.administration.BindRoleRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                role_id:
+                    type: string
+        api.console.administration.CreatePermissionReply:
+            type: object
+            properties: {}
+        api.console.administration.CreatePermissionRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                alias:
+                    type: string
+                describe:
+                    type: string
+                actions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.Action'
+                status:
+                    type: integer
+                    format: enum
+        api.console.administration.CreateRoleReply:
+            type: object
+            properties: {}
+        api.console.administration.CreateRoleRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                describe:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+        api.console.administration.CreateUserReply:
+            type: object
+            properties:
+                id:
+                    type: string
+        api.console.administration.CreateUserRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                re_password:
+                    type: string
+                email:
+                    type: string
+                nickname:
+                    type: string
+                role_id:
+                    type: string
+                omit_perm:
+                    type: array
+                    items:
+                        type: string
+        api.console.administration.DeletePermissionReply:
+            type: object
+            properties: {}
+        api.console.administration.DeleteRoleReply:
+            type: object
+            properties: {}
+        api.console.administration.DeleteUserReply:
+            type: object
+            properties: {}
+        api.console.administration.GetPermissionReply:
+            type: object
+            properties:
+                name:
+                    type: string
+                alias:
+                    type: string
+                describe:
+                    type: string
+                actions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.Action'
+                status:
+                    type: integer
+                    format: enum
+        api.console.administration.GetRoleReply:
+            type: object
+            properties:
+                name:
+                    type: string
+                describe:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                actions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.Action'
+                data_access:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.Action'
+        api.console.administration.GetUserReply:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/api.console.administration.UserInfo'
+                role_id:
+                    type: string
+        api.console.administration.ListPermissionReply:
+            type: object
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.PermissionInfo'
+                pagination:
+                    $ref: '#/components/schemas/protobuf.Pagination'
+        api.console.administration.ListRoleReply:
+            type: object
+            properties:
+                pagination:
+                    $ref: '#/components/schemas/protobuf.Pagination'
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.RoleInfo'
+        api.console.administration.ListUserReply:
+            type: object
+            properties:
+                pagination:
+                    $ref: '#/components/schemas/protobuf.Pagination'
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.UserInfo'
+        api.console.administration.PermissionInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                alias:
+                    type: string
+                describe:
+                    type: string
+                actions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.Action'
+                status:
+                    type: integer
+                    format: enum
+        api.console.administration.RoleInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                describe:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                actions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.Action'
+                data_access:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.Action'
+        api.console.administration.UnbindNamespaceReply:
+            type: object
+            properties: {}
+        api.console.administration.UnbindPermissionReply:
+            type: object
+            properties: {}
+        api.console.administration.UnbindPermissionRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                permission_id:
+                    type: string
+        api.console.administration.UnbindRoleReply:
+            type: object
+            properties: {}
+        api.console.administration.UpdatePermissionReply:
+            type: object
+            properties: {}
+        api.console.administration.UpdatePermissionRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                alias:
+                    type: string
+                describe:
+                    type: string
+                actions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.Action'
+                status:
+                    type: integer
+                    format: enum
+        api.console.administration.UpdateRoleReply:
+            type: object
+            properties: {}
+        api.console.administration.UpdateRoleRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                describe:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+        api.console.administration.UpdateUserReply:
+            type: object
+            properties: {}
+        api.console.administration.UpdateUserRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                email:
+                    type: string
+                nickname:
+                    type: string
+                password:
+                    type: string
+                re_password:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+        api.console.administration.UserInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                username:
+                    type: string
+                email:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+                role_ids:
+                    type: array
+                    items:
+                        type: string
+        protobuf.Pagination:
+            type: object
+            properties:
+                current:
+                    type: integer
+                    format: int32
+                page_size:
+                    type: integer
+                    format: int32
+                total:
+                    type: integer
+                    format: int32
+                raw_total:
+                    type: string
+            description: 通用的分页信息
+    securitySchemes:
+        ApiKeyAuth:
+            type: apiKey
+            name: Authorization
+            in: header
+tags:
+    - name: Permission
+    - name: Role
+    - name: User

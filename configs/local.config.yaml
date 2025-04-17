@@ -1,0 +1,19 @@
+registry:
+  enabled: true
+  only_discovery: false
+  namespace: /microservices
+  endpoints:
+    - 127.0.0.1:2379
+tracing:
+  endpoint: http://127.0.0.1:14268/api/traces
+data:
+  database:
+    driver: sqlite
+    source: kratos.db?cache=shared&mode=rwc&_journal_mode=WAL&_pragma=journal_mode(WAL)&charset=utf8mb4&parseTime=true&loc=Local
+    # source: :memory:?cache=shared&mode=memory&charset=utf8mb4&parseTime=true&loc=Local
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+logger:
+  level: debug

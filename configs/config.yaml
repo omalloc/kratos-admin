@@ -1,0 +1,15 @@
+server:
+  http:
+    addr: 0.0.0.0:8010
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9010
+    timeout: 1s
+data:
+  database:
+    driver: mysql
+    source: root:abc@123..@tcp(127.0.0.1:3306)/kratos_cp?charset=utf8mb4&parseTime=true&loc=Local
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s
