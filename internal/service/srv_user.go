@@ -5,10 +5,10 @@ import (
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/omalloc/contrib/protobuf"
 	"github.com/samber/lo"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/omalloc/contrib/protobuf"
 	pb "github.com/omalloc/kratos-admin/api/console/administration"
 	"github.com/omalloc/kratos-admin/internal/biz"
 )
@@ -93,16 +93,7 @@ func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.
 	}
 
 	return &pb.GetUserReply{
-		User: &pb.UserInfo{
-			Id:        user.ID,
-			Username:  user.Username,
-			Email:     user.Email,
-			Nickname:  user.Nickname,
-			Status:    pb.UserStatus(user.Status),
-			CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
-			RoleIds:   lo.Map(user.Roles, func(item *biz.Role, _ int) int64 { return item.ID }),
-		},
+		User: toMap(user, 0),
 	}, nil
 }
 
@@ -113,22 +104,9 @@ func (s *UserService) ListUser(ctx context.Context, req *pb.ListUserRequest) (*p
 		return nil, err
 	}
 
-	userInfos := make([]*pb.UserInfo, 0, len(users))
-	for _, user := range users {
-		userInfos = append(userInfos, &pb.UserInfo{
-			Id:        user.ID,
-			Username:  user.Username,
-			Email:     user.Email,
-			Nickname:  user.Nickname,
-			Status:    pb.UserStatus(user.Status),
-			CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
-		})
-	}
-
 	return &pb.ListUserReply{
 		Pagination: pagination.Resp(),
-		Data:       userInfos,
+		Data:       lo.Map(users, toMap),
 	}, nil
 }
 
@@ -147,15 +125,28 @@ func (s *UserService) UnbindNamespace(ctx context.Context, req *pb.UnbindNamespa
 }
 
 func (s *UserService) BindRole(ctx context.Context, req *pb.BindRoleRequest) (*pb.BindRoleReply, error) {
-	if err := s.usecase.BindRole(ctx, req.Id, req.RoleId); err != nil {
+	if err := s.usecase.BindRole(ctx, req.Id, int(req.RoleId)); err != nil {
 		return nil, err
 	}
 	return &pb.BindRoleReply{}, nil
 }
 
 func (s *UserService) UnbindRole(ctx context.Context, req *pb.UnbindRoleRequest) (*pb.UnbindRoleReply, error) {
-	if err := s.usecase.UnbindRole(ctx, req.Id, req.RoleId); err != nil {
+	if err := s.usecase.UnbindRole(ctx, req.Id, int(req.RoleId)); err != nil {
 		return nil, err
 	}
 	return &pb.UnbindRoleReply{}, nil
+}
+
+func toMap(user *biz.UserInfo, _ int) *pb.UserInfo {
+	return &pb.UserInfo{
+		Id:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		Nickname:  user.Nickname,
+		Status:    pb.UserStatus(user.Status),
+		CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
+		RoleIds:   user.RoleIDs,
+	}
 }
