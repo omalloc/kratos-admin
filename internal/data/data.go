@@ -76,7 +76,6 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 			&biz.Role{},
 			&biz.Permission{},
 			&biz.RolePermission{},
-			&biz.UserNamespace{},
 			&biz.UserRole{},
 		)
 

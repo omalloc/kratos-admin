@@ -19,24 +19,20 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationUserBindNamespace = "/api.console.administration.User/BindNamespace"
 const OperationUserBindRole = "/api.console.administration.User/BindRole"
 const OperationUserCreateUser = "/api.console.administration.User/CreateUser"
 const OperationUserDeleteUser = "/api.console.administration.User/DeleteUser"
 const OperationUserGetUser = "/api.console.administration.User/GetUser"
 const OperationUserListUser = "/api.console.administration.User/ListUser"
-const OperationUserUnbindNamespace = "/api.console.administration.User/UnbindNamespace"
 const OperationUserUnbindRole = "/api.console.administration.User/UnbindRole"
 const OperationUserUpdateUser = "/api.console.administration.User/UpdateUser"
 
 type UserHTTPServer interface {
-	BindNamespace(context.Context, *BindNamespaceRequest) (*BindNamespaceReply, error)
 	BindRole(context.Context, *BindRoleRequest) (*BindRoleReply, error)
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserReply, error)
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserReply, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
 	ListUser(context.Context, *ListUserRequest) (*ListUserReply, error)
-	UnbindNamespace(context.Context, *UnbindNamespaceRequest) (*UnbindNamespaceReply, error)
 	UnbindRole(context.Context, *UnbindRoleRequest) (*UnbindRoleReply, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserReply, error)
 }
@@ -48,8 +44,6 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r.DELETE("/api/console/user/{id}", _User_DeleteUser0_HTTP_Handler(srv))
 	r.GET("/api/console/user/{id}", _User_GetUser0_HTTP_Handler(srv))
 	r.GET("/api/console/user", _User_ListUser0_HTTP_Handler(srv))
-	r.POST("/api/console/user/{id}/namespace", _User_BindNamespace0_HTTP_Handler(srv))
-	r.DELETE("/api/console/user/{id}/namespace/{namespace_id}", _User_UnbindNamespace0_HTTP_Handler(srv))
 	r.POST("/api/console/user/{id}/role", _User_BindRole0_HTTP_Handler(srv))
 	r.DELETE("/api/console/user/{id}/role/{role_id}", _User_UnbindRole0_HTTP_Handler(srv))
 }
@@ -164,53 +158,6 @@ func _User_ListUser0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) err
 	}
 }
 
-func _User_BindNamespace0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in BindNamespaceRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationUserBindNamespace)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.BindNamespace(ctx, req.(*BindNamespaceRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*BindNamespaceReply)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _User_UnbindNamespace0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in UnbindNamespaceRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationUserUnbindNamespace)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UnbindNamespace(ctx, req.(*UnbindNamespaceRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*UnbindNamespaceReply)
-		return ctx.Result(200, reply)
-	}
-}
-
 func _User_BindRole0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in BindRoleRequest
@@ -259,13 +206,11 @@ func _User_UnbindRole0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) e
 }
 
 type UserHTTPClient interface {
-	BindNamespace(ctx context.Context, req *BindNamespaceRequest, opts ...http.CallOption) (rsp *BindNamespaceReply, err error)
 	BindRole(ctx context.Context, req *BindRoleRequest, opts ...http.CallOption) (rsp *BindRoleReply, err error)
 	CreateUser(ctx context.Context, req *CreateUserRequest, opts ...http.CallOption) (rsp *CreateUserReply, err error)
 	DeleteUser(ctx context.Context, req *DeleteUserRequest, opts ...http.CallOption) (rsp *DeleteUserReply, err error)
 	GetUser(ctx context.Context, req *GetUserRequest, opts ...http.CallOption) (rsp *GetUserReply, err error)
 	ListUser(ctx context.Context, req *ListUserRequest, opts ...http.CallOption) (rsp *ListUserReply, err error)
-	UnbindNamespace(ctx context.Context, req *UnbindNamespaceRequest, opts ...http.CallOption) (rsp *UnbindNamespaceReply, err error)
 	UnbindRole(ctx context.Context, req *UnbindRoleRequest, opts ...http.CallOption) (rsp *UnbindRoleReply, err error)
 	UpdateUser(ctx context.Context, req *UpdateUserRequest, opts ...http.CallOption) (rsp *UpdateUserReply, err error)
 }
@@ -276,19 +221,6 @@ type UserHTTPClientImpl struct {
 
 func NewUserHTTPClient(client *http.Client) UserHTTPClient {
 	return &UserHTTPClientImpl{client}
-}
-
-func (c *UserHTTPClientImpl) BindNamespace(ctx context.Context, in *BindNamespaceRequest, opts ...http.CallOption) (*BindNamespaceReply, error) {
-	var out BindNamespaceReply
-	pattern := "/api/console/user/{id}/namespace"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationUserBindNamespace))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
 }
 
 func (c *UserHTTPClientImpl) BindRole(ctx context.Context, in *BindRoleRequest, opts ...http.CallOption) (*BindRoleReply, error) {
@@ -350,19 +282,6 @@ func (c *UserHTTPClientImpl) ListUser(ctx context.Context, in *ListUserRequest, 
 	opts = append(opts, http.Operation(OperationUserListUser))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-func (c *UserHTTPClientImpl) UnbindNamespace(ctx context.Context, in *UnbindNamespaceRequest, opts ...http.CallOption) (*UnbindNamespaceReply, error) {
-	var out UnbindNamespaceReply
-	pattern := "/api/console/user/{id}/namespace/{namespace_id}"
-	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationUserUnbindNamespace))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

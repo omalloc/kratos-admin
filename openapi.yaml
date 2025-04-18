@@ -401,53 +401,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.DeleteUserReply'
-    /api/console/user/{id}/namespace:
-        post:
-            tags:
-                - User
-            operationId: User_BindNamespace
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.console.administration.BindNamespaceRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.console.administration.BindNamespaceReply'
-    /api/console/user/{id}/namespace/{namespace_id}:
-        delete:
-            tags:
-                - User
-            operationId: User_UnbindNamespace
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: namespace_id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.console.administration.UnbindNamespaceReply'
     /api/console/user/{id}/role:
         post:
             tags:
@@ -506,16 +459,6 @@ components:
                     type: string
                 checked:
                     type: boolean
-        api.console.administration.BindNamespaceReply:
-            type: object
-            properties: {}
-        api.console.administration.BindNamespaceRequest:
-            type: object
-            properties:
-                id:
-                    type: string
-                namespace_id:
-                    type: string
         api.console.administration.BindPermissionReply:
             type: object
             properties: {}
@@ -648,8 +591,10 @@ components:
             properties:
                 user:
                     $ref: '#/components/schemas/api.console.administration.UserInfo'
-                role_id:
-                    type: string
+                roles:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.RoleInfo'
         api.console.administration.ListPermissionReply:
             type: object
             properties:
@@ -707,6 +652,19 @@ components:
                 status:
                     type: integer
                     format: int32
+                permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.RolePermission'
+        api.console.administration.RolePermission:
+            type: object
+            properties:
+                id:
+                    type: string
+                role_id:
+                    type: string
+                perm_id:
+                    type: string
                 actions:
                     type: array
                     items:
@@ -715,9 +673,6 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.Action'
-        api.console.administration.UnbindNamespaceReply:
-            type: object
-            properties: {}
         api.console.administration.UnbindPermissionReply:
             type: object
             properties: {}
@@ -804,8 +759,10 @@ components:
                     format: enum
                 created_at:
                     type: string
+                    format: date-time
                 updated_at:
                     type: string
+                    format: date-time
                 role_ids:
                     type: array
                     items:

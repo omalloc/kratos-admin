@@ -19,15 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	User_CreateUser_FullMethodName      = "/api.console.administration.User/CreateUser"
-	User_UpdateUser_FullMethodName      = "/api.console.administration.User/UpdateUser"
-	User_DeleteUser_FullMethodName      = "/api.console.administration.User/DeleteUser"
-	User_GetUser_FullMethodName         = "/api.console.administration.User/GetUser"
-	User_ListUser_FullMethodName        = "/api.console.administration.User/ListUser"
-	User_BindNamespace_FullMethodName   = "/api.console.administration.User/BindNamespace"
-	User_UnbindNamespace_FullMethodName = "/api.console.administration.User/UnbindNamespace"
-	User_BindRole_FullMethodName        = "/api.console.administration.User/BindRole"
-	User_UnbindRole_FullMethodName      = "/api.console.administration.User/UnbindRole"
+	User_CreateUser_FullMethodName = "/api.console.administration.User/CreateUser"
+	User_UpdateUser_FullMethodName = "/api.console.administration.User/UpdateUser"
+	User_DeleteUser_FullMethodName = "/api.console.administration.User/DeleteUser"
+	User_GetUser_FullMethodName    = "/api.console.administration.User/GetUser"
+	User_ListUser_FullMethodName   = "/api.console.administration.User/ListUser"
+	User_BindRole_FullMethodName   = "/api.console.administration.User/BindRole"
+	User_UnbindRole_FullMethodName = "/api.console.administration.User/UnbindRole"
 )
 
 // UserClient is the client API for User service.
@@ -39,8 +37,6 @@ type UserClient interface {
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserReply, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserReply, error)
 	ListUser(ctx context.Context, in *ListUserRequest, opts ...grpc.CallOption) (*ListUserReply, error)
-	BindNamespace(ctx context.Context, in *BindNamespaceRequest, opts ...grpc.CallOption) (*BindNamespaceReply, error)
-	UnbindNamespace(ctx context.Context, in *UnbindNamespaceRequest, opts ...grpc.CallOption) (*UnbindNamespaceReply, error)
 	BindRole(ctx context.Context, in *BindRoleRequest, opts ...grpc.CallOption) (*BindRoleReply, error)
 	UnbindRole(ctx context.Context, in *UnbindRoleRequest, opts ...grpc.CallOption) (*UnbindRoleReply, error)
 }
@@ -103,26 +99,6 @@ func (c *userClient) ListUser(ctx context.Context, in *ListUserRequest, opts ...
 	return out, nil
 }
 
-func (c *userClient) BindNamespace(ctx context.Context, in *BindNamespaceRequest, opts ...grpc.CallOption) (*BindNamespaceReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(BindNamespaceReply)
-	err := c.cc.Invoke(ctx, User_BindNamespace_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userClient) UnbindNamespace(ctx context.Context, in *UnbindNamespaceRequest, opts ...grpc.CallOption) (*UnbindNamespaceReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UnbindNamespaceReply)
-	err := c.cc.Invoke(ctx, User_UnbindNamespace_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *userClient) BindRole(ctx context.Context, in *BindRoleRequest, opts ...grpc.CallOption) (*BindRoleReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BindRoleReply)
@@ -152,8 +128,6 @@ type UserServer interface {
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserReply, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
 	ListUser(context.Context, *ListUserRequest) (*ListUserReply, error)
-	BindNamespace(context.Context, *BindNamespaceRequest) (*BindNamespaceReply, error)
-	UnbindNamespace(context.Context, *UnbindNamespaceRequest) (*UnbindNamespaceReply, error)
 	BindRole(context.Context, *BindRoleRequest) (*BindRoleReply, error)
 	UnbindRole(context.Context, *UnbindRoleRequest) (*UnbindRoleReply, error)
 	mustEmbedUnimplementedUserServer()
@@ -180,12 +154,6 @@ func (UnimplementedUserServer) GetUser(context.Context, *GetUserRequest) (*GetUs
 }
 func (UnimplementedUserServer) ListUser(context.Context, *ListUserRequest) (*ListUserReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUser not implemented")
-}
-func (UnimplementedUserServer) BindNamespace(context.Context, *BindNamespaceRequest) (*BindNamespaceReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BindNamespace not implemented")
-}
-func (UnimplementedUserServer) UnbindNamespace(context.Context, *UnbindNamespaceRequest) (*UnbindNamespaceReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UnbindNamespace not implemented")
 }
 func (UnimplementedUserServer) BindRole(context.Context, *BindRoleRequest) (*BindRoleReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BindRole not implemented")
@@ -304,42 +272,6 @@ func _User_ListUser_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
-func _User_BindNamespace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BindNamespaceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServer).BindNamespace(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: User_BindNamespace_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).BindNamespace(ctx, req.(*BindNamespaceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _User_UnbindNamespace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UnbindNamespaceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServer).UnbindNamespace(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: User_UnbindNamespace_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).UnbindNamespace(ctx, req.(*UnbindNamespaceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _User_BindRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(BindRoleRequest)
 	if err := dec(in); err != nil {
@@ -402,14 +334,6 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListUser",
 			Handler:    _User_ListUser_Handler,
-		},
-		{
-			MethodName: "BindNamespace",
-			Handler:    _User_BindNamespace_Handler,
-		},
-		{
-			MethodName: "UnbindNamespace",
-			Handler:    _User_UnbindNamespace_Handler,
 		},
 		{
 			MethodName: "BindRole",

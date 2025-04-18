@@ -20,6 +20,10 @@ import (
 	"github.com/omalloc/kratos-admin/internal/service"
 )
 
+import (
+	_ "github.com/omalloc/kratos-admin/pkg/gorm-schema"
+)
+
 // Injectors from wire.go:
 
 // wireApp init kratos application.
@@ -51,9 +55,9 @@ func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.
 	}
 	transaction := orm.NewTransactionManager(dataData)
 	userRepo := data.NewUserRepo(transaction)
-	userUsecase := biz.NewUserUsecase(userRepo, transaction, logger)
-	userService := service.NewUserService(userUsecase, logger)
 	roleRepo := data.NewRoleRepo(transaction)
+	userUsecase := biz.NewUserUsecase(userRepo, roleRepo, transaction, logger)
+	userService := service.NewUserService(userUsecase, logger)
 	roleUsecase := biz.NewRoleUsecase(roleRepo, transaction, logger)
 	roleService := service.NewRoleService(roleUsecase)
 	permissionRepo := data.NewPermissionRepo(transaction)

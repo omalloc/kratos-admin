@@ -38,8 +38,18 @@ func (r *userRepo) SelectUserByEmail(ctx context.Context, email string) (*biz.Us
 	return r.selectByField(ctx, "email", email)
 }
 
-func (r *userRepo) SelectUserByID(ctx context.Context, id int64) (*biz.User, error) {
-	return r.selectByField(ctx, "id", id)
+func (r *userRepo) SelectUserByID(ctx context.Context, id int64) (*biz.UserInfo, error) {
+	var ret biz.UserInfo
+
+	err := r.txm.WithContext(ctx).Model(&biz.UserInfo{}).
+		Select("users.*", "GROUP_CONCAT(roles.id) as role_ids").
+		Omit("users.password").
+		Joins("LEFT JOIN users_bind_role ON users.id = users_bind_role.user_id").
+		Joins("LEFT JOIN roles ON users_bind_role.role_id = roles.id").
+		Where("users.id = ?", id).
+		First(&ret).Error
+
+	return &ret, err
 }
 
 func (r *userRepo) SelectList(ctx context.Context, pagination *protobuf.Pagination) ([]*biz.UserInfo, error) {
@@ -48,7 +58,7 @@ func (r *userRepo) SelectList(ctx context.Context, pagination *protobuf.Paginati
 		err  error
 	)
 	err = r.txm.WithContext(ctx).Model(&biz.User{}).
-		Select("users.*", "group_concat(roles.id) as role_ids").
+		Select("users.*", "GROUP_CONCAT(roles.id) as role_ids").
 		Omit("users.password").
 		Joins("LEFT JOIN users_bind_role ON users.id = users_bind_role.user_id").
 		Joins("LEFT JOIN roles ON users_bind_role.role_id = roles.id").
@@ -59,22 +69,11 @@ func (r *userRepo) SelectList(ctx context.Context, pagination *protobuf.Paginati
 	return list, err
 }
 
-func (r *userRepo) BindNamespace(ctx context.Context, userID int64, namespaceID int64) error {
-	return r.txm.WithContext(ctx).Create(&biz.UserNamespace{
-		UserID:      userID,
-		NamespaceID: namespaceID,
-	}).Error
-}
-
 func (r *userRepo) BindRole(ctx context.Context, userID int64, roleID int) error {
 	return r.txm.WithContext(ctx).Create(&biz.UserRole{
 		UserID: userID,
 		RoleID: roleID,
 	}).Error
-}
-
-func (r *userRepo) UnbindNamespace(ctx context.Context, userID int64, namespaceID int64) error {
-	return r.txm.WithContext(ctx).Where("user_id = ? AND namespace_id = ?", userID, namespaceID).Delete(&biz.UserNamespace{}).Error
 }
 
 func (r *userRepo) UnbindRole(ctx context.Context, userID int64, roleID int) error {

@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/omalloc/contrib/kratos/orm"
 	"github.com/omalloc/contrib/protobuf"
+	"github.com/samber/lo"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -31,19 +32,14 @@ type UserInfo struct {
 	RoleIDs []int64 `json:"role_ids" gorm:"serializer:intslice"`
 }
 
+type UserRoleInfo struct {
+	User
+
+	Roles []*Role `json:"roles"`
+}
+
 func (User) TableName() string {
 	return "users"
-}
-
-type UserNamespace struct {
-	ID          int64     `json:"id" gorm:"primaryKey"`
-	UserID      int64     `json:"user_id" gorm:"column:user_id;type:int;uniqueIndex:idx_unique_user_namespace;comment:用户ID"`
-	NamespaceID int64     `json:"namespace_id" gorm:"column:namespace_id;type:int;uniqueIndex:idx_unique_user_namespace;comment:命名空间ID"`
-	CreatedAt   time.Time `json:"created_at" gorm:"column:created_at;type:datetime;comment:创建时间"` // 授权时间
-}
-
-func (UserNamespace) TableName() string {
-	return "users_bind_namespace"
 }
 
 type UserRole struct {
@@ -59,12 +55,9 @@ func (UserRole) TableName() string {
 
 type UserRepo interface {
 	SelectList(ctx context.Context, pagination *protobuf.Pagination) ([]*UserInfo, error)
-	SelectUserByID(ctx context.Context, id int64) (*User, error)
+	SelectUserByID(ctx context.Context, id int64) (*UserInfo, error)
 	SelectUserByName(ctx context.Context, name string) (*User, error)
 	SelectUserByEmail(ctx context.Context, email string) (*User, error)
-
-	BindNamespace(ctx context.Context, userID int64, namespaceID int64) error
-	UnbindNamespace(ctx context.Context, userID int64, namespaceID int64) error
 
 	BindRole(ctx context.Context, userID int64, roleID int) error
 	UnbindRole(ctx context.Context, userID int64, roleID int) error
@@ -78,11 +71,13 @@ type UserUsecase struct {
 	log      *log.Helper
 	txm      orm.Transaction
 	userRepo UserRepo
+	roleRepo RoleRepo
 }
 
-func NewUserUsecase(repo UserRepo, txm orm.Transaction, logger log.Logger) *UserUsecase {
+func NewUserUsecase(repo UserRepo, roleRepo RoleRepo, txm orm.Transaction, logger log.Logger) *UserUsecase {
 	return &UserUsecase{
 		userRepo: repo,
+		roleRepo: roleRepo,
 		txm:      txm,
 		log:      log.NewHelper(logger),
 	}
@@ -96,7 +91,6 @@ func (uc *UserUsecase) CreateUser(ctx context.Context, user *User) error {
 	user.Password = string(hp)
 
 	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
-
 		curr, err1 := uc.userRepo.SelectUserByName(ctx, user.Username)
 		if err1 != nil && !errors.Is(err1, gorm.ErrRecordNotFound) {
 			uc.log.Errorf("SelectUserByName error: %v", err1)
@@ -112,24 +106,40 @@ func (uc *UserUsecase) CreateUser(ctx context.Context, user *User) error {
 }
 
 // GetUser 获取用户信息
-func (uc *UserUsecase) GetUser(ctx context.Context, id int64) (*UserInfo, error) {
+func (uc *UserUsecase) GetUser(ctx context.Context, id int64) (*UserRoleInfo, error) {
 	var (
-		userInfo UserInfo
-		err      error
+		ret UserRoleInfo
+		err error
 	)
-	err = uc.txm.WithContext(context.Background()).
-		Model(&User{}).
-		Select("users.*", "GROUP_CONCAT(roles.id) as role_ids").
-		Joins("LEFT JOIN users_bind_role ON users.id = users_bind_role.user_id").
-		Joins("LEFT JOIN roles ON users_bind_role.role_id = roles.id").
-		Group("users.id").
-		Where("users.id = ?", id).
-		Find(&userInfo).Error
+	err = uc.txm.Transaction(ctx, func(ctx context.Context) error {
+		user, err := uc.userRepo.SelectUserByID(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		roles, err := uc.roleRepo.SelectRolePermission(ctx, user.RoleIDs)
+		if err != nil {
+			return err
+		}
+
+		ret.User = user.User
+		ret.Roles = lo.Map(roles, func(item *RoleJoinPermission, _ int) *Role {
+			return &Role{
+				ID:          item.ID,
+				Name:        item.Name,
+				Describe:    item.Describe,
+				Status:      item.Status,
+				Permissions: item.Permissions,
+			}
+		})
+
+		return nil
+	})
 
 	if err != nil {
 		return nil, err
 	}
-	return &userInfo, nil
+	return &ret, nil
 }
 
 // UpdateUser 更新用户信息
@@ -153,21 +163,9 @@ func (uc *UserUsecase) ListUser(ctx context.Context, pagination *protobuf.Pagina
 	return uc.userRepo.SelectList(ctx, pagination)
 }
 
-func (uc *UserUsecase) BindNamespace(ctx context.Context, userID int64, namespaceID int64) error {
-	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
-		return uc.userRepo.BindNamespace(ctx, userID, namespaceID)
-	})
-}
-
 func (uc *UserUsecase) BindRole(ctx context.Context, userID int64, roleID int) error {
 	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
 		return uc.userRepo.BindRole(ctx, userID, roleID)
-	})
-}
-
-func (uc *UserUsecase) UnbindNamespace(ctx context.Context, userID int64, namespaceID int64) error {
-	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
-		return uc.userRepo.UnbindNamespace(ctx, userID, namespaceID)
 	})
 }
 

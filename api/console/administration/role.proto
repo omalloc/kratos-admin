@@ -50,13 +50,22 @@ service Role {
 	}
 }
 
+message RolePermission {
+	int64 id = 1;
+	int64 role_id = 2;
+	int64 perm_id = 3;
+	repeated Action actions = 4;
+	repeated Action data_access = 5;
+}
+
 message RoleInfo {
 	int64 id = 1;
 	string name = 2;
 	string describe = 3;
 	int32 status = 4;
-	repeated Action actions = 5;
-	repeated Action data_access = 6;
+	repeated RolePermission permissions = 5;
+	// repeated Action actions = 5;
+	// repeated Action data_access = 6;
 }
 
 message CreateRoleRequest {

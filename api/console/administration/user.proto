@@ -7,6 +7,7 @@ option java_multiple_files = true;
 option java_package = "api.console.administration";
 
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 import "protobuf/pagination.proto";
 import "console/administration/role.proto";
 
@@ -33,17 +34,6 @@ service User {
 		option (google.api.http).get = "/api/console/user";
 	}
 
-	rpc BindNamespace (BindNamespaceRequest) returns (BindNamespaceReply) {
-		option (google.api.http) = {
-			post: "/api/console/user/{id}/namespace"
-			body: "*"
-		};
-	}
-	rpc UnbindNamespace (UnbindNamespaceRequest) returns (UnbindNamespaceReply) {
-		option (google.api.http) = {
-			delete: "/api/console/user/{id}/namespace/{namespace_id}"
-		};
-	}
 	rpc BindRole (BindRoleRequest) returns (BindRoleReply) {
 		option (google.api.http) = {
 			post: "/api/console/user/{id}/role"
@@ -75,8 +65,8 @@ message UserInfo {
 	string nickname = 4;
 	string avatar = 5;
 	UserStatus status = 6;
-	string created_at = 7;
-	string updated_at = 8;
+	google.protobuf.Timestamp created_at = 7;
+	google.protobuf.Timestamp updated_at = 8;
 	repeated int32 role_ids = 10;
 }
 
@@ -114,7 +104,7 @@ message GetUserRequest {
 }
 message GetUserReply {
 	UserInfo user = 1;
-	int64 role_id = 2;
+	repeated RoleInfo roles = 2;
 }
 
 message ListUserRequest {
@@ -125,23 +115,11 @@ message ListUserReply {
 	repeated UserInfo data = 2;
 }
 
-message BindNamespaceRequest {
-	int64 id = 1;
-	int64 namespace_id = 2;
-}
-message BindNamespaceReply {}
-
 message BindRoleRequest {
 	int64 id = 1;
 	int64 role_id = 2;
 }
 message BindRoleReply {}
-
-message UnbindNamespaceRequest {
-	int64 id = 1;
-	int64 namespace_id = 2;
-}
-message UnbindNamespaceReply {}
 
 message UnbindRoleRequest {
 	int64 id = 1;

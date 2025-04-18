@@ -8,6 +8,7 @@ import (
 	"github.com/omalloc/contrib/kratos/orm/crud"
 	"github.com/omalloc/contrib/protobuf"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/omalloc/kratos-admin/internal/biz"
 )
@@ -51,6 +52,28 @@ func (r *roleRepo) SelectFilterList(ctx context.Context, pagination *protobuf.Pa
 		Find(&list).Error
 
 	return list, err
+}
+
+func (r *roleRepo) SelectByUserID(ctx context.Context, userID int64) ([]*biz.Role, error) {
+	var roles []*biz.Role
+
+	err := r.txm.WithContext(ctx).Model(&biz.Role{}).
+		Joins("LEFT JOIN users_bind_role ON roles.id = users_bind_role.role_id").
+		Where("users_bind_role.user_id = ?", userID).
+		Find(&roles).Error
+
+	return roles, err
+}
+
+func (r *roleRepo) SelectRolePermission(ctx context.Context, roleIDs []int64) ([]*biz.RoleJoinPermission, error) {
+	var ret []*biz.RoleJoinPermission
+
+	err := r.txm.WithContext(ctx).Model(&biz.RoleJoinPermission{}).
+		Where("roles.id IN (?)", roleIDs).
+		Preload(clause.Associations).
+		Find(&ret).Error
+
+	return ret, err
 }
 
 // BindPermission implements biz.RoleRepo.

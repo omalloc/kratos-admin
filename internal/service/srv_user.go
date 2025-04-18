@@ -8,6 +8,7 @@ import (
 	"github.com/omalloc/contrib/protobuf"
 	"github.com/samber/lo"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "github.com/omalloc/kratos-admin/api/console/administration"
 	"github.com/omalloc/kratos-admin/internal/biz"
@@ -93,7 +94,32 @@ func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.
 	}
 
 	return &pb.GetUserReply{
-		User: toMap(user, 0),
+		User: &pb.UserInfo{
+			Id:        user.ID,
+			Username:  user.Username,
+			Email:     user.Email,
+			Nickname:  user.Nickname,
+			Status:    pb.UserStatus(user.Status),
+			CreatedAt: timestamppb.New(user.CreatedAt),
+			UpdatedAt: timestamppb.New(user.UpdatedAt),
+		},
+		Roles: lo.Map(user.Roles, func(item *biz.Role, _ int) *pb.RoleInfo {
+			return &pb.RoleInfo{
+				Id:       item.ID,
+				Name:     item.Name,
+				Describe: item.Describe,
+				Status:   int32(item.Status),
+				Permissions: lo.Map(item.Permissions, func(item *biz.RolePermission, _ int) *pb.RolePermission {
+					return &pb.RolePermission{
+						Id:         item.ID,
+						RoleId:     item.RoleID,
+						PermId:     item.PermID,
+						Actions:    lo.Map(item.Actions, fromAction),
+						DataAccess: lo.Map(item.DataAccess, fromAction),
+					}
+				}),
+			}
+		}),
 	}, nil
 }
 
@@ -108,20 +134,6 @@ func (s *UserService) ListUser(ctx context.Context, req *pb.ListUserRequest) (*p
 		Pagination: pagination.Resp(),
 		Data:       lo.Map(users, toMap),
 	}, nil
-}
-
-func (s *UserService) BindNamespace(ctx context.Context, req *pb.BindNamespaceRequest) (*pb.BindNamespaceReply, error) {
-	if err := s.usecase.BindNamespace(ctx, req.Id, req.NamespaceId); err != nil {
-		return nil, err
-	}
-	return &pb.BindNamespaceReply{}, nil
-}
-
-func (s *UserService) UnbindNamespace(ctx context.Context, req *pb.UnbindNamespaceRequest) (*pb.UnbindNamespaceReply, error) {
-	if err := s.usecase.UnbindNamespace(ctx, req.Id, req.NamespaceId); err != nil {
-		return nil, err
-	}
-	return &pb.UnbindNamespaceReply{}, nil
 }
 
 func (s *UserService) BindRole(ctx context.Context, req *pb.BindRoleRequest) (*pb.BindRoleReply, error) {
@@ -145,8 +157,8 @@ func toMap(user *biz.UserInfo, _ int) *pb.UserInfo {
 		Email:     user.Email,
 		Nickname:  user.Nickname,
 		Status:    pb.UserStatus(user.Status),
-		CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt: timestamppb.New(user.CreatedAt),
+		UpdatedAt: timestamppb.New(user.UpdatedAt),
 		RoleIds: lo.Map(user.RoleIDs, func(item int64, _ int) int32 {
 			return int32(item)
 		}),
