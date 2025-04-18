@@ -20,6 +20,7 @@ import (
 
 	"github.com/omalloc/kratos-admin/internal/conf"
 	"github.com/omalloc/kratos-admin/internal/server"
+	_ "github.com/omalloc/kratos-admin/pkg/gorm-schema"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"

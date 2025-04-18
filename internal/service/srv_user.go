@@ -147,6 +147,8 @@ func toMap(user *biz.UserInfo, _ int) *pb.UserInfo {
 		Status:    pb.UserStatus(user.Status),
 		CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
-		RoleIds:   user.RoleIDs,
+		RoleIds: lo.Map(user.RoleIDs, func(item int64, _ int) int32 {
+			return int32(item)
+		}),
 	}
 }

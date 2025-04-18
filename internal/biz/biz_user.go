@@ -10,8 +10,6 @@ import (
 	"github.com/omalloc/contrib/protobuf"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-
-	gormschema "github.com/omalloc/kratos-admin/pkg/gorm-schema"
 )
 
 type User struct {
@@ -30,7 +28,7 @@ type User struct {
 type UserInfo struct {
 	User
 
-	RoleIDs gormschema.StringSlice[int32] `json:"role_ids" gorm:"<-:false;-:migration"`
+	RoleIDs []int64 `json:"role_ids" gorm:"serializer:intslice"`
 }
 
 func (User) TableName() string {
