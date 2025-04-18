@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/omalloc/contrib/protobuf"
 	"github.com/samber/lo"
 
 	pb "github.com/omalloc/kratos-admin/api/console/administration"
@@ -42,14 +43,15 @@ func (s *PermissionService) GetPermission(ctx context.Context, req *pb.GetPermis
 	return &pb.GetPermissionReply{}, nil
 }
 func (s *PermissionService) ListPermission(ctx context.Context, req *pb.ListPermissionRequest) (*pb.ListPermissionReply, error) {
-	permissions, err := s.usecase.ListPermission(ctx, req.Pagination)
+	pagination := protobuf.PageWrap(req.Pagination)
+	permissions, err := s.usecase.ListPermission(ctx, pagination)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.ListPermissionReply{
 		Data:       lo.Map(permissions, toPermissionInfo),
-		Pagination: req.Pagination.Resp(),
+		Pagination: pagination.Resp(),
 	}, nil
 }
 
