@@ -32,9 +32,20 @@ func (s *RoleService) CreateRole(ctx context.Context, req *pb.CreateRoleRequest)
 	return &pb.CreateRoleReply{}, nil
 }
 func (s *RoleService) UpdateRole(ctx context.Context, req *pb.UpdateRoleRequest) (*pb.UpdateRoleReply, error) {
+	if err := s.usecase.UpdateRole(ctx, &biz.Role{
+		ID:       req.Id,
+		Name:     req.Name,
+		Describe: req.Describe,
+		Status:   int64(req.Status),
+	}); err != nil {
+		return nil, err
+	}
 	return &pb.UpdateRoleReply{}, nil
 }
 func (s *RoleService) DeleteRole(ctx context.Context, req *pb.DeleteRoleRequest) (*pb.DeleteRoleReply, error) {
+	if err := s.usecase.DeleteRole(ctx, req.Id); err != nil {
+		return nil, err
+	}
 	return &pb.DeleteRoleReply{}, nil
 }
 func (s *RoleService) GetRole(ctx context.Context, req *pb.GetRoleRequest) (*pb.GetRoleReply, error) {

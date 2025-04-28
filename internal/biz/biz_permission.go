@@ -53,3 +53,11 @@ func (uc *PermissionUsecase) CreatePermission(ctx context.Context, permission *P
 func (uc *PermissionUsecase) ListPermission(ctx context.Context, pagination *protobuf.Pagination) ([]*Permission, error) {
 	return uc.permissionRepo.SelectList(ctx, pagination)
 }
+
+func (uc *PermissionUsecase) UpdatePermission(ctx context.Context, permission *Permission) error {
+	return uc.permissionRepo.Update(ctx, permission.ID, permission)
+}
+
+func (uc *PermissionUsecase) DeletePermission(ctx context.Context, id int64) error {
+	return uc.permissionRepo.Delete(ctx, id)
+}

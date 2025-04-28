@@ -34,8 +34,19 @@ func (s *PermissionService) CreatePermission(ctx context.Context, req *pb.Create
 	return &pb.CreatePermissionReply{}, nil
 }
 func (s *PermissionService) UpdatePermission(ctx context.Context, req *pb.UpdatePermissionRequest) (*pb.UpdatePermissionReply, error) {
+	if err := s.usecase.UpdatePermission(ctx, &biz.Permission{
+		ID:       req.Id,
+		Name:     req.Name,
+		Alias:    req.Alias,
+		Describe: req.Describe,
+		Status:   int64(req.Status),
+		Actions:  lo.Map(req.Actions, toAction),
+	}); err != nil {
+		return nil, err
+	}
 	return &pb.UpdatePermissionReply{}, nil
 }
+
 func (s *PermissionService) DeletePermission(ctx context.Context, req *pb.DeletePermissionRequest) (*pb.DeletePermissionReply, error) {
 	return &pb.DeletePermissionReply{}, nil
 }
