@@ -61,9 +61,10 @@ message RolePermission {
 message RoleInfo {
 	int64 id = 1;
 	string name = 2;
-	string describe = 3;
-	int32 status = 4;
-	repeated RolePermission permissions = 5;
+	string alias = 3;
+	string describe = 4;
+	int32 status = 5;
+	repeated RolePermission permissions = 6;
 	// repeated Action actions = 5;
 	// repeated Action data_access = 6;
 }
@@ -92,11 +93,14 @@ message GetRoleRequest {
 	int64 id = 1;
 }
 message GetRoleReply {
-	string name = 1;
-	string describe = 2;
-	int32 status = 3;
-	repeated Action actions = 4;
-	repeated Action data_access = 5;
+	int64 id = 1;
+	string name = 2;
+	string alias = 3;
+	string describe = 4;
+	int32 status = 5;
+	repeated RolePermission permissions = 6;
+	repeated Action actions = 7;
+	repeated Action data_access = 8;
 }
 
 message ListRoleRequest {

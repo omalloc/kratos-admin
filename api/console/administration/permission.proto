@@ -33,6 +33,9 @@ service Permission {
 	rpc ListPermission (ListPermissionRequest) returns (ListPermissionReply){
 		option (google.api.http).get = "/api/console/permission";
 	}
+	rpc ListAllPermission (ListAllPermissionRequest) returns (ListAllPermissionReply){
+		option (google.api.http).get = "/api/console/permission-scoped";
+	}
 }
 
 enum PermissionStatus {
@@ -101,4 +104,11 @@ message ListPermissionRequest {
 message ListPermissionReply {
 	repeated PermissionInfo data = 1;
 	protobuf.Pagination pagination = 2;
+}
+
+message ListAllPermissionRequest {
+}
+
+message ListAllPermissionReply {
+	repeated PermissionInfo data = 1;
 }

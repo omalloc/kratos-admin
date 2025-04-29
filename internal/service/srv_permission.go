@@ -55,18 +55,29 @@ func (s *PermissionService) GetPermission(ctx context.Context, req *pb.GetPermis
 }
 func (s *PermissionService) ListPermission(ctx context.Context, req *pb.ListPermissionRequest) (*pb.ListPermissionReply, error) {
 	pagination := protobuf.PageWrap(req.Pagination)
-	permissions, err := s.usecase.ListPermission(ctx, pagination)
+	permissions, err := s.usecase.ListPermission(ctx, req.Name, int32(req.Status), pagination)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.ListPermissionReply{
-		Data:       lo.Map(permissions, toPermissionInfo),
+		Data:       lo.Map(permissions, s.toMap),
 		Pagination: pagination.Resp(),
 	}, nil
 }
 
-func toPermissionInfo(permission *biz.Permission, _ int) *pb.PermissionInfo {
+func (s *PermissionService) ListAllPermission(ctx context.Context, req *pb.ListAllPermissionRequest) (*pb.ListAllPermissionReply, error) {
+	permissions, err := s.usecase.ListAllPermission(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.ListAllPermissionReply{
+		Data: lo.Map(permissions, s.toMap),
+	}, nil
+}
+
+func (s *PermissionService) toMap(permission *biz.Permission, _ int) *pb.PermissionInfo {
 	return &pb.PermissionInfo{
 		Id:       permission.ID,
 		Name:     permission.Name,

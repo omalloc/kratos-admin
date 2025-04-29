@@ -40,6 +40,17 @@ func (r *roleRepo) SelectByName(ctx context.Context, name string) (*biz.Role, er
 	return &role, err
 }
 
+func (r *roleRepo) SelectID(ctx context.Context, id int64) (*biz.RoleJoinPermission, error) {
+	var ret *biz.RoleJoinPermission
+
+	err := r.txm.WithContext(ctx).Model(&biz.RoleJoinPermission{}).
+		Where("roles.id = ?", id).
+		Preload(clause.Associations).
+		Find(&ret).Error
+
+	return ret, err
+}
+
 func (r *roleRepo) SelectFilterList(ctx context.Context, pagination *protobuf.Pagination) ([]*biz.Role, error) {
 	var (
 		list []*biz.Role

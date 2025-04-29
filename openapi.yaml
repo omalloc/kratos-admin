@@ -76,6 +76,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.CreatePermissionReply'
+    /api/console/permission-scoped:
+        get:
+            tags:
+                - Permission
+            operationId: Permission_ListAllPermission
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.ListAllPermissionReply'
     /api/console/permission/{id}:
         get:
             tags:
@@ -571,13 +583,21 @@ components:
         api.console.administration.GetRoleReply:
             type: object
             properties:
+                id:
+                    type: string
                 name:
+                    type: string
+                alias:
                     type: string
                 describe:
                     type: string
                 status:
                     type: integer
                     format: int32
+                permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.RolePermission'
                 actions:
                     type: array
                     items:
@@ -595,6 +615,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.RoleInfo'
+        api.console.administration.ListAllPermissionReply:
+            type: object
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.PermissionInfo'
         api.console.administration.ListPermissionReply:
             type: object
             properties:
@@ -646,6 +673,8 @@ components:
                 id:
                     type: string
                 name:
+                    type: string
+                alias:
                     type: string
                 describe:
                     type: string

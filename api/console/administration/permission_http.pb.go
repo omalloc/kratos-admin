@@ -22,6 +22,7 @@ const _ = http.SupportPackageIsVersion1
 const OperationPermissionCreatePermission = "/api.console.administration.Permission/CreatePermission"
 const OperationPermissionDeletePermission = "/api.console.administration.Permission/DeletePermission"
 const OperationPermissionGetPermission = "/api.console.administration.Permission/GetPermission"
+const OperationPermissionListAllPermission = "/api.console.administration.Permission/ListAllPermission"
 const OperationPermissionListPermission = "/api.console.administration.Permission/ListPermission"
 const OperationPermissionUpdatePermission = "/api.console.administration.Permission/UpdatePermission"
 
@@ -29,6 +30,7 @@ type PermissionHTTPServer interface {
 	CreatePermission(context.Context, *CreatePermissionRequest) (*CreatePermissionReply, error)
 	DeletePermission(context.Context, *DeletePermissionRequest) (*DeletePermissionReply, error)
 	GetPermission(context.Context, *GetPermissionRequest) (*GetPermissionReply, error)
+	ListAllPermission(context.Context, *ListAllPermissionRequest) (*ListAllPermissionReply, error)
 	ListPermission(context.Context, *ListPermissionRequest) (*ListPermissionReply, error)
 	UpdatePermission(context.Context, *UpdatePermissionRequest) (*UpdatePermissionReply, error)
 }
@@ -40,6 +42,7 @@ func RegisterPermissionHTTPServer(s *http.Server, srv PermissionHTTPServer) {
 	r.DELETE("/api/console/permission/{id}", _Permission_DeletePermission0_HTTP_Handler(srv))
 	r.GET("/api/console/permission/{id}", _Permission_GetPermission0_HTTP_Handler(srv))
 	r.GET("/api/console/permission", _Permission_ListPermission0_HTTP_Handler(srv))
+	r.GET("/api/console/permission-scoped", _Permission_ListAllPermission0_HTTP_Handler(srv))
 }
 
 func _Permission_CreatePermission0_HTTP_Handler(srv PermissionHTTPServer) func(ctx http.Context) error {
@@ -152,10 +155,30 @@ func _Permission_ListPermission0_HTTP_Handler(srv PermissionHTTPServer) func(ctx
 	}
 }
 
+func _Permission_ListAllPermission0_HTTP_Handler(srv PermissionHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAllPermissionRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPermissionListAllPermission)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListAllPermission(ctx, req.(*ListAllPermissionRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListAllPermissionReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type PermissionHTTPClient interface {
 	CreatePermission(ctx context.Context, req *CreatePermissionRequest, opts ...http.CallOption) (rsp *CreatePermissionReply, err error)
 	DeletePermission(ctx context.Context, req *DeletePermissionRequest, opts ...http.CallOption) (rsp *DeletePermissionReply, err error)
 	GetPermission(ctx context.Context, req *GetPermissionRequest, opts ...http.CallOption) (rsp *GetPermissionReply, err error)
+	ListAllPermission(ctx context.Context, req *ListAllPermissionRequest, opts ...http.CallOption) (rsp *ListAllPermissionReply, err error)
 	ListPermission(ctx context.Context, req *ListPermissionRequest, opts ...http.CallOption) (rsp *ListPermissionReply, err error)
 	UpdatePermission(ctx context.Context, req *UpdatePermissionRequest, opts ...http.CallOption) (rsp *UpdatePermissionReply, err error)
 }
@@ -199,6 +222,19 @@ func (c *PermissionHTTPClientImpl) GetPermission(ctx context.Context, in *GetPer
 	pattern := "/api/console/permission/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPermissionGetPermission))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PermissionHTTPClientImpl) ListAllPermission(ctx context.Context, in *ListAllPermissionRequest, opts ...http.CallOption) (*ListAllPermissionReply, error) {
+	var out ListAllPermissionReply
+	pattern := "/api/console/permission-scoped"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPermissionListAllPermission))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

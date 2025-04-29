@@ -33,7 +33,9 @@ type PermissionRepo interface {
 	Update(ctx context.Context, id int64, permission *Permission) error
 	Delete(ctx context.Context, id int64) error
 	GetPermission(ctx context.Context, id int64) (*Permission, error)
-	SelectList(ctx context.Context, pagination *protobuf.Pagination) ([]*Permission, error)
+	SelectList(ctx context.Context, name string, status int32, pagination *protobuf.Pagination) ([]*Permission, error)
+
+	SelectAll(ctx context.Context, scoped bool) ([]*Permission, error)
 }
 
 type PermissionUsecase struct {
@@ -50,8 +52,12 @@ func (uc *PermissionUsecase) CreatePermission(ctx context.Context, permission *P
 	return uc.permissionRepo.Create(ctx, permission)
 }
 
-func (uc *PermissionUsecase) ListPermission(ctx context.Context, pagination *protobuf.Pagination) ([]*Permission, error) {
-	return uc.permissionRepo.SelectList(ctx, pagination)
+func (uc *PermissionUsecase) ListPermission(ctx context.Context, name string, status int32, pagination *protobuf.Pagination) ([]*Permission, error) {
+	return uc.permissionRepo.SelectList(ctx, name, status, pagination)
+}
+
+func (uc *PermissionUsecase) ListAllPermission(ctx context.Context) ([]*Permission, error) {
+	return uc.permissionRepo.SelectAll(ctx, true)
 }
 
 func (uc *PermissionUsecase) UpdatePermission(ctx context.Context, permission *Permission) error {

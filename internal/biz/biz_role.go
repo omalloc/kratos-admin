@@ -12,7 +12,8 @@ import (
 
 type Role struct {
 	ID       int64  `json:"id" gorm:"primaryKey"`
-	Name     string `json:"name" gorm:"column:name;type:varchar(64);comment:角色名"`
+	Name     string `json:"name" gorm:"column:name;type:varchar(64);comment:角色唯一标识"`
+	Alias    string `json:"alias" gorm:"column:alias;type:varchar(64);comment:角色别名"`
 	Describe string `json:"describe" gorm:"column:describe;type:varchar(255);comment:描述"`
 	Status   int64  `json:"status" gorm:"column:status;type:int;comment:状态"`
 
@@ -53,6 +54,7 @@ type RoleRepo interface {
 
 	SelectFilterList(ctx context.Context, pagination *protobuf.Pagination) ([]*Role, error)
 	SelectByUserID(ctx context.Context, userID int64) ([]*Role, error)
+	SelectID(ctx context.Context, id int64) (*RoleJoinPermission, error)
 	SelectRolePermission(ctx context.Context, roleIDs []int64) ([]*RoleJoinPermission, error)
 
 	BindPermission(ctx context.Context, roleID int64, permissionID int64, actions []*Action, dataAccess []*Action) error
@@ -97,6 +99,10 @@ func (uc *RoleUsecase) ListRole(ctx context.Context, pagination *protobuf.Pagina
 
 func (uc *RoleUsecase) SelectByUserID(ctx context.Context, userID int64) ([]*Role, error) {
 	return uc.roleRepo.SelectByUserID(ctx, userID)
+}
+
+func (uc *RoleUsecase) SelectID(ctx context.Context, id int64) (*RoleJoinPermission, error) {
+	return uc.roleRepo.SelectID(ctx, id)
 }
 
 func (uc *RoleUsecase) BindPermission(ctx context.Context, roleID int64, permissionID int64, actions []*Action, dataAccess []*Action) error {
