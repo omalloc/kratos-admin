@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/omalloc/contrib/protobuf"
 	"github.com/samber/lo"
@@ -26,6 +27,7 @@ func (s *RoleService) CreateRole(ctx context.Context, req *pb.CreateRoleRequest)
 	if err := s.usecase.CreateRole(ctx, &biz.Role{
 		Name:     req.Name,
 		Describe: req.Describe,
+		Alias:    req.Alias,
 		Status:   int64(req.Status),
 	}); err != nil {
 		return nil, err
@@ -36,6 +38,7 @@ func (s *RoleService) UpdateRole(ctx context.Context, req *pb.UpdateRoleRequest)
 	if err := s.usecase.UpdateRole(ctx, &biz.Role{
 		ID:       req.Id,
 		Name:     req.Name,
+		Alias:    req.Alias,
 		Describe: req.Describe,
 		Status:   int64(req.Status),
 	}); err != nil {
@@ -77,7 +80,6 @@ func (s *RoleService) ListRole(ctx context.Context, req *pb.ListRoleRequest) (*p
 	if err != nil {
 		return nil, err
 	}
-
 	return &pb.ListRoleReply{
 		Data:       lo.Map(roles, s.toMap),
 		Pagination: pagination.Resp(),
@@ -86,11 +88,14 @@ func (s *RoleService) ListRole(ctx context.Context, req *pb.ListRoleRequest) (*p
 
 func (s *RoleService) BindPermission(ctx context.Context, req *pb.BindPermissionRequest) (*pb.BindPermissionReply, error) {
 	// convert to *biz.Action
-	actions := lo.Map(req.Actions, toAction)
-	dataAccess := lo.Map(req.DataAccess, toAction)
-
-	if err := s.usecase.BindPermission(ctx, req.Id, req.PermissionId, actions, dataAccess); err != nil {
-		return nil, err
+	for _, item := range req.Data {
+		actions := lo.Map(item.Actions, toAction)
+		dataAccess := lo.Map(item.DataAccess, toAction)
+		fmt.Println("item.PermissionId", item.PermissionId)
+		fmt.Println("req.Id", req.Id)
+		if err := s.usecase.BindPermission(ctx, req.Id, item.PermissionId, actions, dataAccess); err != nil {
+			return nil, err
+		}
 	}
 
 	return &pb.BindPermissionReply{}, nil
@@ -107,5 +112,6 @@ func (s *RoleService) toMap(item *biz.Role, _ int) *pb.RoleInfo {
 		Id:       item.ID,
 		Name:     item.Name,
 		Describe: item.Describe,
+		Alias:    item.Alias,
 	}
 }

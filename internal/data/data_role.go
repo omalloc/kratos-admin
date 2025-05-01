@@ -89,13 +89,29 @@ func (r *roleRepo) SelectRolePermission(ctx context.Context, roleIDs []int64) ([
 
 // BindPermission implements biz.RoleRepo.
 func (r *roleRepo) BindPermission(ctx context.Context, roleID int64, permissionID int64, actions []*biz.Action, dataAccess []*biz.Action) error {
-	return r.txm.WithContext(ctx).Model(&biz.RolePermission{}).
-		Create(&biz.RolePermission{
-			RoleID:     roleID,
-			PermID:     permissionID,
-			Actions:    actions,
-			DataAccess: dataAccess,
-		}).Error
+	var rolePerm biz.RolePermission
+	result := r.txm.WithContext(ctx).Model(&biz.RolePermission{}).
+		Where("role_id = ? AND perm_id = ?", roleID, permissionID).
+		First(&rolePerm)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			// Create new record if not found
+			return r.txm.WithContext(ctx).Model(&biz.RolePermission{}).
+				Create(&biz.RolePermission{
+					RoleID:     roleID,
+					PermID:     permissionID,
+					Actions:    actions,
+					DataAccess: dataAccess,
+				}).Error
+		}
+		return result.Error
+	}
+
+	// Update existing record
+	rolePerm.Actions = actions
+	rolePerm.DataAccess = dataAccess
+	return r.txm.WithContext(ctx).Save(&rolePerm).Error
 }
 
 // UnbindPermission implements biz.RoleRepo.
@@ -103,4 +119,8 @@ func (r *roleRepo) UnbindPermission(ctx context.Context, roleID int64, permissio
 	return r.txm.WithContext(ctx).Model(&biz.RolePermission{}).
 		Where("role_id = ? AND perm_id = ?", roleID, permissionID).
 		Delete(&biz.RolePermission{}).Error
+}
+
+func (r *roleRepo) Update(ctx context.Context, id int64, role *biz.Role) error {
+	return r.txm.WithContext(ctx).Where("id = ?", id).Updates(role).Error
 }

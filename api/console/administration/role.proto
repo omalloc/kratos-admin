@@ -73,6 +73,7 @@ message CreateRoleRequest {
 	string name = 1;
 	string describe = 2;
 	int32 status = 3;
+	string alias = 4;
 }
 message CreateRoleReply {}
 
@@ -81,6 +82,7 @@ message UpdateRoleRequest {
 	string name = 2;
 	string describe = 3;
 	int32 status = 4;
+	string alias = 5;
 }
 message UpdateRoleReply {}
 

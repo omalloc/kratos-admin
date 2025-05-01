@@ -471,14 +471,9 @@ components:
                     type: string
                 checked:
                     type: boolean
-        api.console.administration.BindPermissionReply:
-            type: object
-            properties: {}
-        api.console.administration.BindPermissionRequest:
+        api.console.administration.BindPermissionBodyRequest:
             type: object
             properties:
-                id:
-                    type: string
                 permission_id:
                     type: string
                 actions:
@@ -489,6 +484,18 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.Action'
+        api.console.administration.BindPermissionReply:
+            type: object
+            properties: {}
+        api.console.administration.BindPermissionRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.BindPermissionBodyRequest'
         api.console.administration.BindRoleReply:
             type: object
             properties: {}
@@ -531,6 +538,8 @@ components:
                 status:
                     type: integer
                     format: int32
+                alias:
+                    type: string
         api.console.administration.CreateUserReply:
             type: object
             properties:
@@ -751,6 +760,8 @@ components:
                 status:
                     type: integer
                     format: int32
+                alias:
+                    type: string
         api.console.administration.UpdateUserReply:
             type: object
             properties: {}

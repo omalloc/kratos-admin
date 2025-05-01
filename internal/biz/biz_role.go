@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -57,6 +58,7 @@ type RoleRepo interface {
 	SelectID(ctx context.Context, id int64) (*RoleJoinPermission, error)
 	SelectRolePermission(ctx context.Context, roleIDs []int64) ([]*RoleJoinPermission, error)
 
+	Update(ctx context.Context, id int64, role *Role) error
 	BindPermission(ctx context.Context, roleID int64, permissionID int64, actions []*Action, dataAccess []*Action) error
 	UnbindPermission(ctx context.Context, roleID int64, permissionID int64) error
 }
@@ -107,7 +109,9 @@ func (uc *RoleUsecase) SelectID(ctx context.Context, id int64) (*RoleJoinPermiss
 
 func (uc *RoleUsecase) BindPermission(ctx context.Context, roleID int64, permissionID int64, actions []*Action, dataAccess []*Action) error {
 	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
-		return uc.roleRepo.BindPermission(ctx, roleID, permissionID, actions, dataAccess)
+		err := uc.roleRepo.BindPermission(ctx, roleID, permissionID, actions, dataAccess)
+		fmt.Println("err", err)
+		return err
 	})
 }
 
