@@ -3,7 +3,6 @@ package data
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/omalloc/contrib/kratos/orm"
 	"github.com/omalloc/contrib/kratos/orm/crud"
@@ -98,7 +97,6 @@ func (r *roleRepo) BindPermission(ctx context.Context, roleID int64, permissionI
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			// Create new record if not found
-			fmt.Println("Create new record if not found")
 			return r.txm.WithContext(ctx).Model(&biz.RolePermission{}).
 				Create(&biz.RolePermission{
 					RoleID:     roleID,
@@ -125,4 +123,9 @@ func (r *roleRepo) UnbindPermission(ctx context.Context, roleID int64, permissio
 
 func (r *roleRepo) Update(ctx context.Context, id int64, role *biz.Role) error {
 	return r.txm.WithContext(ctx).Where("id = ?", id).Updates(role).Error
+}
+
+func (r *roleRepo) GetAll(ctx context.Context) ([]*biz.Role, error) {
+	var roles []*biz.Role
+	return roles, r.txm.WithContext(ctx).Model(&biz.Role{}).Find(&roles).Error
 }

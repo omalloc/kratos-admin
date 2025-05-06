@@ -72,12 +72,12 @@ message UserInfo {
 
 message CreateUserRequest {
 	string username = 1;
-	string password = 2;
-	string re_password = 3;
-	string email = 4;
-	string nickname = 5;
-	int64 role_id = 6;
-	repeated string omit_perm = 7;
+	string nickname = 2;
+	string email = 3;
+	string password = 4;
+	string re_password = 5;
+	bool disabled = 6;
+	repeated int64 role = 7;
 }
 
 message CreateUserReply {
@@ -91,6 +91,7 @@ message UpdateUserRequest {
 	string password = 4;
 	string re_password = 5;
 	UserStatus status = 6;
+	repeated int64 role = 7;
 }
 message UpdateUserReply {}
 

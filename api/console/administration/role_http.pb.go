@@ -22,6 +22,7 @@ const _ = http.SupportPackageIsVersion1
 const OperationRoleBindPermission = "/api.console.administration.Role/BindPermission"
 const OperationRoleCreateRole = "/api.console.administration.Role/CreateRole"
 const OperationRoleDeleteRole = "/api.console.administration.Role/DeleteRole"
+const OperationRoleGetAll = "/api.console.administration.Role/GetAll"
 const OperationRoleGetRole = "/api.console.administration.Role/GetRole"
 const OperationRoleListRole = "/api.console.administration.Role/ListRole"
 const OperationRoleUnbindPermission = "/api.console.administration.Role/UnbindPermission"
@@ -31,6 +32,7 @@ type RoleHTTPServer interface {
 	BindPermission(context.Context, *BindPermissionRequest) (*BindPermissionReply, error)
 	CreateRole(context.Context, *CreateRoleRequest) (*CreateRoleReply, error)
 	DeleteRole(context.Context, *DeleteRoleRequest) (*DeleteRoleReply, error)
+	GetAll(context.Context, *GetAllRequest) (*GetAllReply, error)
 	GetRole(context.Context, *GetRoleRequest) (*GetRoleReply, error)
 	ListRole(context.Context, *ListRoleRequest) (*ListRoleReply, error)
 	UnbindPermission(context.Context, *UnbindPermissionRequest) (*UnbindPermissionReply, error)
@@ -46,6 +48,7 @@ func RegisterRoleHTTPServer(s *http.Server, srv RoleHTTPServer) {
 	r.GET("/api/console/role", _Role_ListRole0_HTTP_Handler(srv))
 	r.PUT("/api/console/role/{id}/permission", _Role_BindPermission0_HTTP_Handler(srv))
 	r.PUT("/api/console/role/{id}/permission/{permission_id}", _Role_UnbindPermission0_HTTP_Handler(srv))
+	r.GET("/api/console/role-all", _Role_GetAll0_HTTP_Handler(srv))
 }
 
 func _Role_CreateRole0_HTTP_Handler(srv RoleHTTPServer) func(ctx http.Context) error {
@@ -208,10 +211,30 @@ func _Role_UnbindPermission0_HTTP_Handler(srv RoleHTTPServer) func(ctx http.Cont
 	}
 }
 
+func _Role_GetAll0_HTTP_Handler(srv RoleHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetAllRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationRoleGetAll)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetAll(ctx, req.(*GetAllRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetAllReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type RoleHTTPClient interface {
 	BindPermission(ctx context.Context, req *BindPermissionRequest, opts ...http.CallOption) (rsp *BindPermissionReply, err error)
 	CreateRole(ctx context.Context, req *CreateRoleRequest, opts ...http.CallOption) (rsp *CreateRoleReply, err error)
 	DeleteRole(ctx context.Context, req *DeleteRoleRequest, opts ...http.CallOption) (rsp *DeleteRoleReply, err error)
+	GetAll(ctx context.Context, req *GetAllRequest, opts ...http.CallOption) (rsp *GetAllReply, err error)
 	GetRole(ctx context.Context, req *GetRoleRequest, opts ...http.CallOption) (rsp *GetRoleReply, err error)
 	ListRole(ctx context.Context, req *ListRoleRequest, opts ...http.CallOption) (rsp *ListRoleReply, err error)
 	UnbindPermission(ctx context.Context, req *UnbindPermissionRequest, opts ...http.CallOption) (rsp *UnbindPermissionReply, err error)
@@ -259,6 +282,19 @@ func (c *RoleHTTPClientImpl) DeleteRole(ctx context.Context, in *DeleteRoleReque
 	opts = append(opts, http.Operation(OperationRoleDeleteRole))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *RoleHTTPClientImpl) GetAll(ctx context.Context, in *GetAllRequest, opts ...http.CallOption) (*GetAllReply, error) {
+	var out GetAllReply
+	pattern := "/api/console/role-all"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationRoleGetAll))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

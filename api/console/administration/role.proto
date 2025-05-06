@@ -48,6 +48,11 @@ service Role {
 			body: "*"
 		};
 	}
+	rpc GetAll (GetAllRequest) returns (GetAllReply) {
+		option (google.api.http) = {
+			get: "/api/console/role-all"
+		};
+	}
 }
 
 message RolePermission {
@@ -116,14 +121,24 @@ message ListRoleReply {
 
 message BindPermissionRequest {
 	int64 id = 1;
+	repeated BindPermissionBodyRequest data = 2;
+}
+
+message BindPermissionBodyRequest {
 	int64 permission_id = 2;
 	repeated Action actions = 3;
 	repeated Action data_access = 4;
 }
 message BindPermissionReply {}
 
+
 message UnbindPermissionRequest {
 	int64 id = 1;
 	int64 permission_id = 2;
 }
 message UnbindPermissionReply {}
+
+message GetAllRequest {}
+message GetAllReply {
+	repeated RoleInfo data = 1;
+}

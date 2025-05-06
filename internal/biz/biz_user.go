@@ -32,6 +32,12 @@ type UserInfo struct {
 	RoleIDs []int64 `json:"role_ids" gorm:"serializer:intslice"`
 }
 
+type TempUserInfo struct {
+	User
+
+	RoleIDs string `json:"role_ids" `
+}
+
 type UserRoleInfo struct {
 	User
 
@@ -61,6 +67,7 @@ type UserRepo interface {
 
 	BindRole(ctx context.Context, userID int64, roleID int) error
 	UnbindRole(ctx context.Context, userID int64, roleID int) error
+	UpdateRole(ctx context.Context, userID int64, roleIDs []int64) error
 
 	Create(ctx context.Context, user *User) error
 	Update(ctx context.Context, id int64, user *User) error
@@ -172,5 +179,11 @@ func (uc *UserUsecase) BindRole(ctx context.Context, userID int64, roleID int) e
 func (uc *UserUsecase) UnbindRole(ctx context.Context, userID int64, roleID int) error {
 	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
 		return uc.userRepo.UnbindRole(ctx, userID, roleID)
+	})
+}
+
+func (uc *UserUsecase) UpdateRole(ctx context.Context, userID int64, roleIDs []int64) error {
+	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
+		return uc.userRepo.UpdateRole(ctx, userID, roleIDs)
 	})
 }

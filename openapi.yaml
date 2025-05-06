@@ -20,7 +20,7 @@ paths:
                 - Permission
             operationId: Permission_ListPermission
             parameters:
-                - name: pagination.current
+                - name: pagination.page
                   in: query
                   schema:
                     type: integer
@@ -35,10 +35,6 @@ paths:
                   schema:
                     type: integer
                     format: int32
-                - name: pagination.raw_total
-                  in: query
-                  schema:
-                    type: string
                 - name: name
                   in: query
                   schema:
@@ -152,7 +148,7 @@ paths:
                 - Role
             operationId: Role_ListRole
             parameters:
-                - name: pagination.current
+                - name: pagination.page
                   in: query
                   schema:
                     type: integer
@@ -167,10 +163,6 @@ paths:
                   schema:
                     type: integer
                     format: int32
-                - name: pagination.raw_total
-                  in: query
-                  schema:
-                    type: string
             responses:
                 "200":
                     description: OK
@@ -195,6 +187,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.CreateRoleReply'
+    /api/console/role-all:
+        get:
+            tags:
+                - Role
+            operationId: Role_GetAll
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.GetAllReply'
     /api/console/role/{id}:
         get:
             tags:
@@ -312,7 +316,7 @@ paths:
                 - User
             operationId: User_ListUser
             parameters:
-                - name: pagination.current
+                - name: pagination.page
                   in: query
                   schema:
                     type: integer
@@ -327,10 +331,6 @@ paths:
                   schema:
                     type: integer
                     format: int32
-                - name: pagination.raw_total
-                  in: query
-                  schema:
-                    type: string
             responses:
                 "200":
                     description: OK
@@ -550,17 +550,17 @@ components:
             properties:
                 username:
                     type: string
+                nickname:
+                    type: string
+                email:
+                    type: string
                 password:
                     type: string
                 re_password:
                     type: string
-                email:
-                    type: string
-                nickname:
-                    type: string
-                role_id:
-                    type: string
-                omit_perm:
+                disabled:
+                    type: boolean
+                role:
                     type: array
                     items:
                         type: string
@@ -573,6 +573,13 @@ components:
         api.console.administration.DeleteUserReply:
             type: object
             properties: {}
+        api.console.administration.GetAllReply:
+            type: object
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.RoleInfo'
         api.console.administration.GetPermissionReply:
             type: object
             properties:
@@ -781,6 +788,10 @@ components:
                 status:
                     type: integer
                     format: enum
+                role:
+                    type: array
+                    items:
+                        type: string
         api.console.administration.UserInfo:
             type: object
             properties:
@@ -811,7 +822,7 @@ components:
         protobuf.Pagination:
             type: object
             properties:
-                current:
+                page:
                     type: integer
                     format: int32
                 page_size:
@@ -820,9 +831,6 @@ components:
                 total:
                     type: integer
                     format: int32
-                raw_total:
-                    type: string
-            description: 通用的分页信息
     securitySchemes:
         ApiKeyAuth:
             type: apiKey

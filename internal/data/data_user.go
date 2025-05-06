@@ -2,9 +2,13 @@ package data
 
 import (
 	"context"
+	"strconv"
+	"strings"
 
 	"github.com/omalloc/contrib/kratos/orm"
 	"github.com/omalloc/contrib/protobuf"
+	"github.com/samber/lo"
+	"gorm.io/gorm"
 
 	"github.com/omalloc/kratos-admin/internal/biz"
 )
@@ -54,7 +58,7 @@ func (r *userRepo) SelectUserByID(ctx context.Context, id int64) (*biz.UserInfo,
 
 func (r *userRepo) SelectList(ctx context.Context, pagination *protobuf.Pagination) ([]*biz.UserInfo, error) {
 	var (
-		list []*biz.UserInfo
+		list []*biz.TempUserInfo
 		err  error
 	)
 	err = r.txm.WithContext(ctx).Model(&biz.User{}).
@@ -66,7 +70,41 @@ func (r *userRepo) SelectList(ctx context.Context, pagination *protobuf.Paginati
 		Count(pagination.Count()).
 		Scopes(pagination.Paginate()).
 		Find(&list).Error
-	return list, err
+	res := make([]*biz.UserInfo, 0, len(list))
+	for i, item := range list {
+		res = append(res, &biz.UserInfo{
+			User: item.User,
+		})
+		if item.RoleIDs != "" {
+			roleIDs := strings.Split(item.RoleIDs, ",")
+			for _, roleID := range roleIDs {
+				res[i].RoleIDs = append(res[i].RoleIDs, lo.Must(strconv.ParseInt(roleID, 10, 64)))
+			}
+		}
+	}
+	return res, err
+}
+
+func (r *userRepo) UpdateRole(ctx context.Context, userID int64, roleIDs []int64) error {
+	err := r.txm.WithContext(ctx).Model(&biz.UserRole{}).Where("user_id = ?", userID).Delete(&biz.UserRole{}).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+
+	if len(roleIDs) > 0 {
+		roles := make([]*biz.UserRole, 0, len(roleIDs))
+		for _, rid := range roleIDs {
+			roles = append(roles, &biz.UserRole{
+				UserID: userID,
+				RoleID: int(rid),
+			})
+		}
+		if err := r.txm.WithContext(ctx).Create(&roles).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (r *userRepo) BindRole(ctx context.Context, userID int64, roleID int) error {
@@ -92,5 +130,12 @@ func (r *userRepo) Delete(ctx context.Context, id int64) error {
 
 // Update implements biz.UserRepo.
 func (r *userRepo) Update(ctx context.Context, id int64, user *biz.User) error {
-	return r.txm.WithContext(ctx).Where("id = ?", id).Updates(user).Error
+	return r.txm.WithContext(ctx).Model(&biz.User{}).
+		Where("id = ?", id).
+		Select("email", "nickname", "status").
+		Updates(map[string]interface{}{
+			"email":    user.Email,
+			"nickname": user.Nickname,
+			"status":   user.Status,
+		}).Error
 }

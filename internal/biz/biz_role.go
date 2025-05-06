@@ -2,7 +2,6 @@ package biz
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -54,6 +53,7 @@ type RoleRepo interface {
 	crud.CRUD[Role]
 
 	SelectFilterList(ctx context.Context, pagination *protobuf.Pagination) ([]*Role, error)
+	GetAll(ctx context.Context) ([]*Role, error)
 	SelectByUserID(ctx context.Context, userID int64) ([]*Role, error)
 	SelectID(ctx context.Context, id int64) (*RoleJoinPermission, error)
 	SelectRolePermission(ctx context.Context, roleIDs []int64) ([]*RoleJoinPermission, error)
@@ -110,7 +110,6 @@ func (uc *RoleUsecase) SelectID(ctx context.Context, id int64) (*RoleJoinPermiss
 func (uc *RoleUsecase) BindPermission(ctx context.Context, roleID int64, permissionID int64, actions []*Action, dataAccess []*Action) error {
 	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
 		err := uc.roleRepo.BindPermission(ctx, roleID, permissionID, actions, dataAccess)
-		fmt.Println("err", err)
 		return err
 	})
 }
@@ -119,4 +118,8 @@ func (uc *RoleUsecase) UnbindPermission(ctx context.Context, roleID int64, permi
 	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
 		return uc.roleRepo.UnbindPermission(ctx, roleID, permissionID)
 	})
+}
+
+func (uc *RoleUsecase) GetAll(ctx context.Context) ([]*Role, error) {
+	return uc.roleRepo.GetAll(ctx)
 }

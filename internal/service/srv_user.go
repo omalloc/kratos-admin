@@ -47,6 +47,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		return nil, err
 	}
 
+	s.usecase.UpdateRole(ctx, user.ID, req.Role)
 	return &pb.CreateUserReply{
 		Id: user.ID,
 	}, nil
@@ -65,7 +66,6 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 		Nickname: req.Nickname,
 		Status:   int64(req.Status),
 	}
-
 	if req.Password != "" {
 		hp, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
@@ -77,6 +77,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 	if err := s.usecase.UpdateUser(ctx, user); err != nil {
 		return nil, err
 	}
+	s.usecase.UpdateRole(ctx, user.ID, req.Role)
 	return &pb.UpdateUserReply{}, nil
 }
 
@@ -124,12 +125,12 @@ func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.
 }
 
 func (s *UserService) ListUser(ctx context.Context, req *pb.ListUserRequest) (*pb.ListUserReply, error) {
+
 	pagination := protobuf.PageWrap(req.Pagination)
 	users, err := s.usecase.ListUser(ctx, pagination)
 	if err != nil {
 		return nil, err
 	}
-
 	return &pb.ListUserReply{
 		Pagination: pagination.Resp(),
 		Data:       lo.Map(users, toMap),
@@ -148,6 +149,13 @@ func (s *UserService) UnbindRole(ctx context.Context, req *pb.UnbindRoleRequest)
 		return nil, err
 	}
 	return &pb.UnbindRoleReply{}, nil
+}
+
+func (s *UserService) UpdateRole(ctx context.Context, userID int64, roleIDs []int64) (*pb.UpdateRoleReply, error) {
+	if err := s.usecase.UpdateRole(ctx, userID, roleIDs); err != nil {
+		return nil, err
+	}
+	return &pb.UpdateRoleReply{}, nil
 }
 
 func toMap(user *biz.UserInfo, _ int) *pb.UserInfo {

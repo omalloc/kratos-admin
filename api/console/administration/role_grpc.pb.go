@@ -26,6 +26,7 @@ const (
 	Role_ListRole_FullMethodName         = "/api.console.administration.Role/ListRole"
 	Role_BindPermission_FullMethodName   = "/api.console.administration.Role/BindPermission"
 	Role_UnbindPermission_FullMethodName = "/api.console.administration.Role/UnbindPermission"
+	Role_GetAll_FullMethodName           = "/api.console.administration.Role/GetAll"
 )
 
 // RoleClient is the client API for Role service.
@@ -39,6 +40,7 @@ type RoleClient interface {
 	ListRole(ctx context.Context, in *ListRoleRequest, opts ...grpc.CallOption) (*ListRoleReply, error)
 	BindPermission(ctx context.Context, in *BindPermissionRequest, opts ...grpc.CallOption) (*BindPermissionReply, error)
 	UnbindPermission(ctx context.Context, in *UnbindPermissionRequest, opts ...grpc.CallOption) (*UnbindPermissionReply, error)
+	GetAll(ctx context.Context, in *GetAllRequest, opts ...grpc.CallOption) (*GetAllReply, error)
 }
 
 type roleClient struct {
@@ -119,6 +121,16 @@ func (c *roleClient) UnbindPermission(ctx context.Context, in *UnbindPermissionR
 	return out, nil
 }
 
+func (c *roleClient) GetAll(ctx context.Context, in *GetAllRequest, opts ...grpc.CallOption) (*GetAllReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAllReply)
+	err := c.cc.Invoke(ctx, Role_GetAll_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RoleServer is the server API for Role service.
 // All implementations must embed UnimplementedRoleServer
 // for forward compatibility.
@@ -130,6 +142,7 @@ type RoleServer interface {
 	ListRole(context.Context, *ListRoleRequest) (*ListRoleReply, error)
 	BindPermission(context.Context, *BindPermissionRequest) (*BindPermissionReply, error)
 	UnbindPermission(context.Context, *UnbindPermissionRequest) (*UnbindPermissionReply, error)
+	GetAll(context.Context, *GetAllRequest) (*GetAllReply, error)
 	mustEmbedUnimplementedRoleServer()
 }
 
@@ -160,6 +173,9 @@ func (UnimplementedRoleServer) BindPermission(context.Context, *BindPermissionRe
 }
 func (UnimplementedRoleServer) UnbindPermission(context.Context, *UnbindPermissionRequest) (*UnbindPermissionReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnbindPermission not implemented")
+}
+func (UnimplementedRoleServer) GetAll(context.Context, *GetAllRequest) (*GetAllReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
 func (UnimplementedRoleServer) mustEmbedUnimplementedRoleServer() {}
 func (UnimplementedRoleServer) testEmbeddedByValue()              {}
@@ -308,6 +324,24 @@ func _Role_UnbindPermission_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Role_GetAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoleServer).GetAll(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Role_GetAll_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoleServer).GetAll(ctx, req.(*GetAllRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Role_ServiceDesc is the grpc.ServiceDesc for Role service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +376,10 @@ var Role_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UnbindPermission",
 			Handler:    _Role_UnbindPermission_Handler,
+		},
+		{
+			MethodName: "GetAll",
+			Handler:    _Role_GetAll_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

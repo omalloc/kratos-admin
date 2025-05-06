@@ -191,12 +191,12 @@ func (x *UserInfo) GetRoleIds() []int32 {
 type CreateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
-	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	RePassword    string                 `protobuf:"bytes,3,opt,name=re_password,json=rePassword,proto3" json:"re_password,omitempty"`
-	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	Nickname      string                 `protobuf:"bytes,5,opt,name=nickname,proto3" json:"nickname,omitempty"`
-	RoleId        int64                  `protobuf:"varint,6,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	OmitPerm      []string               `protobuf:"bytes,7,rep,name=omit_perm,json=omitPerm,proto3" json:"omit_perm,omitempty"`
+	Nickname      string                 `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
+	RePassword    string                 `protobuf:"bytes,5,opt,name=re_password,json=rePassword,proto3" json:"re_password,omitempty"`
+	Disabled      bool                   `protobuf:"varint,6,opt,name=disabled,proto3" json:"disabled,omitempty"`
+	Role          []int64                `protobuf:"varint,7,rep,packed,name=role,proto3" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -238,6 +238,20 @@ func (x *CreateUserRequest) GetUsername() string {
 	return ""
 }
 
+func (x *CreateUserRequest) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
+}
+
+func (x *CreateUserRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
 func (x *CreateUserRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
@@ -252,30 +266,16 @@ func (x *CreateUserRequest) GetRePassword() string {
 	return ""
 }
 
-func (x *CreateUserRequest) GetEmail() string {
+func (x *CreateUserRequest) GetDisabled() bool {
 	if x != nil {
-		return x.Email
+		return x.Disabled
 	}
-	return ""
+	return false
 }
 
-func (x *CreateUserRequest) GetNickname() string {
+func (x *CreateUserRequest) GetRole() []int64 {
 	if x != nil {
-		return x.Nickname
-	}
-	return ""
-}
-
-func (x *CreateUserRequest) GetRoleId() int64 {
-	if x != nil {
-		return x.RoleId
-	}
-	return 0
-}
-
-func (x *CreateUserRequest) GetOmitPerm() []string {
-	if x != nil {
-		return x.OmitPerm
+		return x.Role
 	}
 	return nil
 }
@@ -332,6 +332,7 @@ type UpdateUserRequest struct {
 	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
 	RePassword    string                 `protobuf:"bytes,5,opt,name=re_password,json=rePassword,proto3" json:"re_password,omitempty"`
 	Status        UserStatus             `protobuf:"varint,6,opt,name=status,proto3,enum=api.console.administration.UserStatus" json:"status,omitempty"`
+	Role          []int64                `protobuf:"varint,7,rep,packed,name=role,proto3" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -406,6 +407,13 @@ func (x *UpdateUserRequest) GetStatus() UserStatus {
 		return x.Status
 	}
 	return UserStatus_UNKNOWN
+}
+
+func (x *UpdateUserRequest) GetRole() []int64 {
+	if x != nil {
+		return x.Role
+	}
+	return nil
 }
 
 type UpdateUserReply struct {
@@ -909,18 +917,18 @@ const file_console_administration_user_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x19\n" +
 	"\brole_ids\x18\n" +
-	" \x03(\x05R\aroleIds\"\xd4\x01\n" +
+	" \x03(\x05R\aroleIds\"\xce\x01\n" +
 	"\x11CreateUserRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1f\n" +
-	"\vre_password\x18\x03 \x01(\tR\n" +
-	"rePassword\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\x12\x1a\n" +
-	"\bnickname\x18\x05 \x01(\tR\bnickname\x12\x17\n" +
-	"\arole_id\x18\x06 \x01(\x03R\x06roleId\x12\x1b\n" +
-	"\tomit_perm\x18\a \x03(\tR\bomitPerm\"!\n" +
+	"\bnickname\x18\x02 \x01(\tR\bnickname\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x1a\n" +
+	"\bpassword\x18\x04 \x01(\tR\bpassword\x12\x1f\n" +
+	"\vre_password\x18\x05 \x01(\tR\n" +
+	"rePassword\x12\x1a\n" +
+	"\bdisabled\x18\x06 \x01(\bR\bdisabled\x12\x12\n" +
+	"\x04role\x18\a \x03(\x03R\x04role\"!\n" +
 	"\x0fCreateUserReply\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\xd2\x01\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\xe6\x01\n" +
 	"\x11UpdateUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
@@ -928,7 +936,8 @@ const file_console_administration_user_proto_rawDesc = "" +
 	"\bpassword\x18\x04 \x01(\tR\bpassword\x12\x1f\n" +
 	"\vre_password\x18\x05 \x01(\tR\n" +
 	"rePassword\x12>\n" +
-	"\x06status\x18\x06 \x01(\x0e2&.api.console.administration.UserStatusR\x06status\"\x11\n" +
+	"\x06status\x18\x06 \x01(\x0e2&.api.console.administration.UserStatusR\x06status\x12\x12\n" +
+	"\x04role\x18\a \x03(\x03R\x04role\"\x11\n" +
 	"\x0fUpdateUserReply\"#\n" +
 	"\x11DeleteUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"\x11\n" +

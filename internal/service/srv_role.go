@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/omalloc/contrib/protobuf"
 	"github.com/samber/lo"
@@ -91,8 +90,6 @@ func (s *RoleService) BindPermission(ctx context.Context, req *pb.BindPermission
 	for _, item := range req.Data {
 		actions := lo.Map(item.Actions, toAction)
 		dataAccess := lo.Map(item.DataAccess, toAction)
-		fmt.Println("item.PermissionId", item.PermissionId)
-		fmt.Println("req.Id", req.Id)
 		if err := s.usecase.BindPermission(ctx, req.Id, item.PermissionId, actions, dataAccess); err != nil {
 			return nil, err
 		}
@@ -105,6 +102,16 @@ func (s *RoleService) UnbindPermission(ctx context.Context, req *pb.UnbindPermis
 		return nil, err
 	}
 	return &pb.UnbindPermissionReply{}, nil
+}
+
+func (s *RoleService) GetAll(ctx context.Context, req *pb.GetAllRequest) (*pb.GetAllReply, error) {
+	roles, err := s.usecase.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetAllReply{
+		Data: lo.Map(roles, s.toMap),
+	}, nil
 }
 
 func (s *RoleService) toMap(item *biz.Role, _ int) *pb.RoleInfo {

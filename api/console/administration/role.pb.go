@@ -955,6 +955,86 @@ func (*UnbindPermissionReply) Descriptor() ([]byte, []int) {
 	return file_console_administration_role_proto_rawDescGZIP(), []int{16}
 }
 
+type GetAllRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAllRequest) Reset() {
+	*x = GetAllRequest{}
+	mi := &file_console_administration_role_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAllRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAllRequest) ProtoMessage() {}
+
+func (x *GetAllRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_console_administration_role_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAllRequest.ProtoReflect.Descriptor instead.
+func (*GetAllRequest) Descriptor() ([]byte, []int) {
+	return file_console_administration_role_proto_rawDescGZIP(), []int{17}
+}
+
+type GetAllReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Data          []*RoleInfo            `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAllReply) Reset() {
+	*x = GetAllReply{}
+	mi := &file_console_administration_role_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAllReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAllReply) ProtoMessage() {}
+
+func (x *GetAllReply) ProtoReflect() protoreflect.Message {
+	mi := &file_console_administration_role_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAllReply.ProtoReflect.Descriptor instead.
+func (*GetAllReply) Descriptor() ([]byte, []int) {
+	return file_console_administration_role_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GetAllReply) GetData() []*RoleInfo {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
 var File_console_administration_role_proto protoreflect.FileDescriptor
 
 const file_console_administration_role_proto_rawDesc = "" +
@@ -1023,7 +1103,10 @@ const file_console_administration_role_proto_rawDesc = "" +
 	"\x17UnbindPermissionRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12#\n" +
 	"\rpermission_id\x18\x02 \x01(\x03R\fpermissionId\"\x17\n" +
-	"\x15UnbindPermissionReply2\x88\b\n" +
+	"\x15UnbindPermissionReply\"\x0f\n" +
+	"\rGetAllRequest\"G\n" +
+	"\vGetAllReply\x128\n" +
+	"\x04data\x18\x01 \x03(\v2$.api.console.administration.RoleInfoR\x04data2\x85\t\n" +
 	"\x04Role\x12\x86\x01\n" +
 	"\n" +
 	"CreateRole\x12-.api.console.administration.CreateRoleRequest\x1a+.api.console.administration.CreateRoleReply\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/api/console/role\x12\x8b\x01\n" +
@@ -1034,7 +1117,8 @@ const file_console_administration_role_proto_rawDesc = "" +
 	"\aGetRole\x12*.api.console.administration.GetRoleRequest\x1a(.api.console.administration.GetRoleReply\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/console/role/{id}\x12}\n" +
 	"\bListRole\x12+.api.console.administration.ListRoleRequest\x1a).api.console.administration.ListRoleReply\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/api/console/role\x12\xa2\x01\n" +
 	"\x0eBindPermission\x121.api.console.administration.BindPermissionRequest\x1a/.api.console.administration.BindPermissionReply\",\x82\xd3\xe4\x93\x02&:\x01*\x1a!/api/console/role/{id}/permission\x12\xb8\x01\n" +
-	"\x10UnbindPermission\x123.api.console.administration.UnbindPermissionRequest\x1a1.api.console.administration.UnbindPermissionReply\"<\x82\xd3\xe4\x93\x026:\x01*\x1a1/api/console/role/{id}/permission/{permission_id}Bk\n" +
+	"\x10UnbindPermission\x123.api.console.administration.UnbindPermissionRequest\x1a1.api.console.administration.UnbindPermissionReply\"<\x82\xd3\xe4\x93\x026:\x01*\x1a1/api/console/role/{id}/permission/{permission_id}\x12{\n" +
+	"\x06GetAll\x12).api.console.administration.GetAllRequest\x1a'.api.console.administration.GetAllReply\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/console/role-allBk\n" +
 	"\x1aapi.console.administrationP\x01ZKgithub.com/omalloc/kratos-console/api/console/administration;administrationb\x06proto3"
 
 var (
@@ -1049,7 +1133,7 @@ func file_console_administration_role_proto_rawDescGZIP() []byte {
 	return file_console_administration_role_proto_rawDescData
 }
 
-var file_console_administration_role_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_console_administration_role_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_console_administration_role_proto_goTypes = []any{
 	(*RolePermission)(nil),            // 0: api.console.administration.RolePermission
 	(*RoleInfo)(nil),                  // 1: api.console.administration.RoleInfo
@@ -1068,41 +1152,46 @@ var file_console_administration_role_proto_goTypes = []any{
 	(*BindPermissionReply)(nil),       // 14: api.console.administration.BindPermissionReply
 	(*UnbindPermissionRequest)(nil),   // 15: api.console.administration.UnbindPermissionRequest
 	(*UnbindPermissionReply)(nil),     // 16: api.console.administration.UnbindPermissionReply
-	(*Action)(nil),                    // 17: api.console.administration.Action
-	(*protobuf.Pagination)(nil),       // 18: protobuf.Pagination
+	(*GetAllRequest)(nil),             // 17: api.console.administration.GetAllRequest
+	(*GetAllReply)(nil),               // 18: api.console.administration.GetAllReply
+	(*Action)(nil),                    // 19: api.console.administration.Action
+	(*protobuf.Pagination)(nil),       // 20: protobuf.Pagination
 }
 var file_console_administration_role_proto_depIdxs = []int32{
-	17, // 0: api.console.administration.RolePermission.actions:type_name -> api.console.administration.Action
-	17, // 1: api.console.administration.RolePermission.data_access:type_name -> api.console.administration.Action
+	19, // 0: api.console.administration.RolePermission.actions:type_name -> api.console.administration.Action
+	19, // 1: api.console.administration.RolePermission.data_access:type_name -> api.console.administration.Action
 	0,  // 2: api.console.administration.RoleInfo.permissions:type_name -> api.console.administration.RolePermission
 	0,  // 3: api.console.administration.GetRoleReply.permissions:type_name -> api.console.administration.RolePermission
-	17, // 4: api.console.administration.GetRoleReply.actions:type_name -> api.console.administration.Action
-	17, // 5: api.console.administration.GetRoleReply.data_access:type_name -> api.console.administration.Action
-	18, // 6: api.console.administration.ListRoleRequest.pagination:type_name -> protobuf.Pagination
-	18, // 7: api.console.administration.ListRoleReply.pagination:type_name -> protobuf.Pagination
+	19, // 4: api.console.administration.GetRoleReply.actions:type_name -> api.console.administration.Action
+	19, // 5: api.console.administration.GetRoleReply.data_access:type_name -> api.console.administration.Action
+	20, // 6: api.console.administration.ListRoleRequest.pagination:type_name -> protobuf.Pagination
+	20, // 7: api.console.administration.ListRoleReply.pagination:type_name -> protobuf.Pagination
 	1,  // 8: api.console.administration.ListRoleReply.data:type_name -> api.console.administration.RoleInfo
 	13, // 9: api.console.administration.BindPermissionRequest.data:type_name -> api.console.administration.BindPermissionBodyRequest
-	17, // 10: api.console.administration.BindPermissionBodyRequest.actions:type_name -> api.console.administration.Action
-	17, // 11: api.console.administration.BindPermissionBodyRequest.data_access:type_name -> api.console.administration.Action
-	2,  // 12: api.console.administration.Role.CreateRole:input_type -> api.console.administration.CreateRoleRequest
-	4,  // 13: api.console.administration.Role.UpdateRole:input_type -> api.console.administration.UpdateRoleRequest
-	6,  // 14: api.console.administration.Role.DeleteRole:input_type -> api.console.administration.DeleteRoleRequest
-	8,  // 15: api.console.administration.Role.GetRole:input_type -> api.console.administration.GetRoleRequest
-	10, // 16: api.console.administration.Role.ListRole:input_type -> api.console.administration.ListRoleRequest
-	12, // 17: api.console.administration.Role.BindPermission:input_type -> api.console.administration.BindPermissionRequest
-	15, // 18: api.console.administration.Role.UnbindPermission:input_type -> api.console.administration.UnbindPermissionRequest
-	3,  // 19: api.console.administration.Role.CreateRole:output_type -> api.console.administration.CreateRoleReply
-	5,  // 20: api.console.administration.Role.UpdateRole:output_type -> api.console.administration.UpdateRoleReply
-	7,  // 21: api.console.administration.Role.DeleteRole:output_type -> api.console.administration.DeleteRoleReply
-	9,  // 22: api.console.administration.Role.GetRole:output_type -> api.console.administration.GetRoleReply
-	11, // 23: api.console.administration.Role.ListRole:output_type -> api.console.administration.ListRoleReply
-	14, // 24: api.console.administration.Role.BindPermission:output_type -> api.console.administration.BindPermissionReply
-	16, // 25: api.console.administration.Role.UnbindPermission:output_type -> api.console.administration.UnbindPermissionReply
-	19, // [19:26] is the sub-list for method output_type
-	12, // [12:19] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	19, // 10: api.console.administration.BindPermissionBodyRequest.actions:type_name -> api.console.administration.Action
+	19, // 11: api.console.administration.BindPermissionBodyRequest.data_access:type_name -> api.console.administration.Action
+	1,  // 12: api.console.administration.GetAllReply.data:type_name -> api.console.administration.RoleInfo
+	2,  // 13: api.console.administration.Role.CreateRole:input_type -> api.console.administration.CreateRoleRequest
+	4,  // 14: api.console.administration.Role.UpdateRole:input_type -> api.console.administration.UpdateRoleRequest
+	6,  // 15: api.console.administration.Role.DeleteRole:input_type -> api.console.administration.DeleteRoleRequest
+	8,  // 16: api.console.administration.Role.GetRole:input_type -> api.console.administration.GetRoleRequest
+	10, // 17: api.console.administration.Role.ListRole:input_type -> api.console.administration.ListRoleRequest
+	12, // 18: api.console.administration.Role.BindPermission:input_type -> api.console.administration.BindPermissionRequest
+	15, // 19: api.console.administration.Role.UnbindPermission:input_type -> api.console.administration.UnbindPermissionRequest
+	17, // 20: api.console.administration.Role.GetAll:input_type -> api.console.administration.GetAllRequest
+	3,  // 21: api.console.administration.Role.CreateRole:output_type -> api.console.administration.CreateRoleReply
+	5,  // 22: api.console.administration.Role.UpdateRole:output_type -> api.console.administration.UpdateRoleReply
+	7,  // 23: api.console.administration.Role.DeleteRole:output_type -> api.console.administration.DeleteRoleReply
+	9,  // 24: api.console.administration.Role.GetRole:output_type -> api.console.administration.GetRoleReply
+	11, // 25: api.console.administration.Role.ListRole:output_type -> api.console.administration.ListRoleReply
+	14, // 26: api.console.administration.Role.BindPermission:output_type -> api.console.administration.BindPermissionReply
+	16, // 27: api.console.administration.Role.UnbindPermission:output_type -> api.console.administration.UnbindPermissionReply
+	18, // 28: api.console.administration.Role.GetAll:output_type -> api.console.administration.GetAllReply
+	21, // [21:29] is the sub-list for method output_type
+	13, // [13:21] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_console_administration_role_proto_init() }
@@ -1117,7 +1206,7 @@ func file_console_administration_role_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_console_administration_role_proto_rawDesc), len(file_console_administration_role_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
