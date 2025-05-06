@@ -560,7 +560,7 @@ components:
                     type: string
                 disabled:
                     type: boolean
-                role:
+                role_ids:
                     type: array
                     items:
                         type: string
@@ -788,7 +788,7 @@ components:
                 status:
                     type: integer
                     format: enum
-                role:
+                role_ids:
                     type: array
                     items:
                         type: string

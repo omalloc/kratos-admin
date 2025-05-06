@@ -77,7 +77,7 @@ message CreateUserRequest {
 	string password = 4;
 	string re_password = 5;
 	bool disabled = 6;
-	repeated int64 role = 7;
+	repeated string role_ids = 7;
 }
 
 message CreateUserReply {
@@ -91,7 +91,7 @@ message UpdateUserRequest {
 	string password = 4;
 	string re_password = 5;
 	UserStatus status = 6;
-	repeated int64 role = 7;
+	repeated string role_ids = 7;
 }
 message UpdateUserReply {}
 

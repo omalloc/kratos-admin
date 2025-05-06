@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -46,8 +47,10 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	if err := s.usecase.CreateUser(ctx, user); err != nil {
 		return nil, err
 	}
-
-	s.usecase.UpdateRole(ctx, user.ID, req.Role)
+	roleIDs := lo.Map(req.RoleIds, func(item string, _ int) int64 {
+		return lo.Must(strconv.ParseInt(item, 10, 64))
+	})
+	s.usecase.UpdateRole(ctx, user.ID, roleIDs)
 	return &pb.CreateUserReply{
 		Id: user.ID,
 	}, nil
@@ -77,7 +80,10 @@ func (s *UserService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 	if err := s.usecase.UpdateUser(ctx, user); err != nil {
 		return nil, err
 	}
-	s.usecase.UpdateRole(ctx, user.ID, req.Role)
+	roleIDs := lo.Map(req.RoleIds, func(item string, _ int) int64 {
+		return lo.Must(strconv.ParseInt(item, 10, 64))
+	})
+	s.usecase.UpdateRole(ctx, user.ID, roleIDs)
 	return &pb.UpdateUserReply{}, nil
 }
 
