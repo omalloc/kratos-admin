@@ -48,6 +48,10 @@ func NewPermissionUsecase(txm orm.Transaction, permissionRepo PermissionRepo) *P
 	return &PermissionUsecase{txm: txm, permissionRepo: permissionRepo}
 }
 
+func (uc *PermissionUsecase) GetPermission(ctx context.Context, id int64) (*Permission, error) {
+	return uc.permissionRepo.GetPermission(ctx, id)
+}
+
 func (uc *PermissionUsecase) CreatePermission(ctx context.Context, permission *Permission) error {
 	return uc.permissionRepo.Create(ctx, permission)
 }

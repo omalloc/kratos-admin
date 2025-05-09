@@ -13,6 +13,7 @@ message Bootstrap {
   protobuf.Tracing tracing = 3;
   protobuf.Registry registry = 4;
   Logger logger = 5;
+  Passport passport = 6;
 }
 
 message Server {
@@ -47,4 +48,8 @@ message Data {
 
 message Logger {
   string level = 1;
+}
+
+message Passport {
+  string secret = 1;
 }

@@ -51,7 +51,19 @@ func (s *PermissionService) DeletePermission(ctx context.Context, req *pb.Delete
 	return &pb.DeletePermissionReply{}, nil
 }
 func (s *PermissionService) GetPermission(ctx context.Context, req *pb.GetPermissionRequest) (*pb.GetPermissionReply, error) {
-	return &pb.GetPermissionReply{}, nil
+	permission, err := s.usecase.GetPermission(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetPermissionReply{
+		Id:       permission.ID,
+		Name:     permission.Name,
+		Alias:    permission.Alias,
+		Describe: permission.Describe,
+		Actions:  lo.Map(permission.Actions, fromAction),
+		Status:   pb.PermissionStatus(permission.Status),
+	}, nil
 }
 func (s *PermissionService) ListPermission(ctx context.Context, req *pb.ListPermissionRequest) (*pb.ListPermissionReply, error) {
 	pagination := protobuf.PageWrap(req.Pagination)

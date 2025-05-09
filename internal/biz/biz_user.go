@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -11,6 +12,8 @@ import (
 	"github.com/samber/lo"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+
+	passportpb "github.com/omalloc/kratos-admin/api/console/passport"
 )
 
 type User struct {
@@ -21,7 +24,7 @@ type User struct {
 	Nickname string `json:"nickname" gorm:"column:nickname;type:varchar(64);comment:昵称"`
 	Bio      string `json:"bio" gorm:"column:bio;type:varchar(255);comment:个人简介"`
 	AvatarID int64  `json:"avatar_id" gorm:"column:avatar_id;comment:头像"`
-	Status   int64  `json:"status" gorm:"column:status;type:int;comment:状态"`
+	Status   int64  `json:"status" gorm:"column:status;type:int;comment:状态"` // 0: 禁用, 1: 正常
 
 	orm.DBModel
 }
@@ -64,6 +67,7 @@ type UserRepo interface {
 	SelectUserByID(ctx context.Context, id int64) (*UserInfo, error)
 	SelectUserByName(ctx context.Context, name string) (*User, error)
 	SelectUserByEmail(ctx context.Context, email string) (*User, error)
+	SelectUserByNameOrEmail(ctx context.Context, value string) (*User, error)
 
 	BindRole(ctx context.Context, userID int64, roleID int) error
 	UnbindRole(ctx context.Context, userID int64, roleID int) error
@@ -118,6 +122,7 @@ func (uc *UserUsecase) GetUser(ctx context.Context, id int64) (*UserRoleInfo, er
 		ret UserRoleInfo
 		err error
 	)
+
 	err = uc.txm.Transaction(ctx, func(ctx context.Context) error {
 		user, err := uc.userRepo.SelectUserByID(ctx, id)
 		if err != nil {
@@ -186,4 +191,42 @@ func (uc *UserUsecase) UpdateRole(ctx context.Context, userID int64, roleIDs []i
 	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
 		return uc.userRepo.UpdateRole(ctx, userID, roleIDs)
 	})
+}
+
+func (uc *UserUsecase) Login(ctx context.Context, username string, password string, autoLogin bool) (*User, error) {
+	user, err := uc.userRepo.SelectUserByNameOrEmail(ctx, username)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, passportpb.ErrorUserOrPasswordError("")
+		}
+		return nil, err
+	}
+
+	if user.Password == "" {
+		return nil, passportpb.ErrorUserOrPasswordError("")
+	}
+
+	// 密码前缀检查，如果非加密密码 进行一次加密并保存
+	if !strings.HasPrefix(user.Password, "$2a$") {
+		buf, err1 := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err1 != nil {
+			return nil, err1
+		}
+		user.Password = string(buf)
+
+		// 更新一次加密密码
+		if err1 := uc.userRepo.Update(ctx, user.ID, user); err1 != nil {
+			return nil, err1
+		}
+	}
+
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
+		return nil, errors.New(400, "USER_OR_PASSWORD_ERROR", "用户名或密码错误")
+	}
+
+	if user.Status == 0 {
+		return nil, errors.New(400, "USER_DISABLED", "用户已禁用")
+	}
+
+	return user, nil
 }

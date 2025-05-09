@@ -27,7 +27,7 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.Data, passport *conf.Passport, logger log.Logger) (*kratos.App, func(), error) {
 	embedEtcdServer, cleanup, err := server.NewEmbedEtcd()
 	if err != nil {
 		return nil, nil, err
@@ -63,8 +63,9 @@ func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.
 	permissionRepo := data.NewPermissionRepo(transaction)
 	permissionUsecase := biz.NewPermissionUsecase(transaction, permissionRepo)
 	permissionService := service.NewPermissionService(permissionUsecase)
-	grpcServer := server.NewGRPCServer(confServer, logger, consoleService, userService, roleService, permissionService)
-	httpServer := server.NewHTTPServer(confServer, logger, userService, roleService, permissionService)
+	passportService := service.NewPassportService(bootstrap, userUsecase)
+	grpcServer := server.NewGRPCServer(confServer, passport, logger, consoleService, userService, roleService, permissionService, passportService)
+	httpServer := server.NewHTTPServer(confServer, passport, logger, userService, roleService, permissionService, passportService)
 	v := server.NewChecker(dataData, client)
 	healthServer := health.NewServer(v, logger, httpServer)
 	app := newApp(logger, embedEtcdServer, registrar, grpcServer, httpServer, healthServer)

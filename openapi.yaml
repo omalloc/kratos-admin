@@ -14,6 +14,114 @@ info:
         url: https://github.com/google/gnostic/blob/master/LICENSE
     version: 1.0.0
 paths:
+    /api/console/passport/current:
+        get:
+            tags:
+                - Passport
+            description: 获取当前用户信息
+            operationId: Passport_CurrentUser
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.passport.CurrentUserReply'
+    /api/console/passport/login:
+        post:
+            tags:
+                - Passport
+            description: 登录
+            operationId: Passport_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.passport.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.passport.LoginReply'
+    /api/console/passport/logout:
+        post:
+            tags:
+                - Passport
+            description: 登出
+            operationId: Passport_Logout
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.passport.LogoutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.passport.LogoutReply'
+    /api/console/passport/register:
+        post:
+            tags:
+                - Passport
+            description: 注册
+            operationId: Passport_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.passport.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.passport.RegisterReply'
+    /api/console/passport/reset_password:
+        post:
+            tags:
+                - Passport
+            description: 重置密码
+            operationId: Passport_ResetPassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.passport.ResetPasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.passport.ResetPasswordReply'
+    /api/console/passport/send_captcha:
+        post:
+            tags:
+                - Passport
+            description: 发送验证码
+            operationId: Passport_SendCaptcha
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.passport.SendCaptchaRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.passport.SendCaptchaReply'
     /api/console/permission:
         get:
             tags:
@@ -583,6 +691,8 @@ components:
         api.console.administration.GetPermissionReply:
             type: object
             properties:
+                id:
+                    type: string
                 name:
                     type: string
                 alias:
@@ -706,18 +816,27 @@ components:
             properties:
                 id:
                     type: string
+                    description: 业务id
                 role_id:
                     type: string
+                    description: 角色id
                 perm_id:
                     type: string
+                    description: 权限id
                 actions:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.Action'
+                    description: 操作权限
                 data_access:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.Action'
+                    description: 数据权限
+                created_at:
+                    type: string
+                    description: 绑定权限时间
+                    format: date-time
         api.console.administration.UnbindPermissionReply:
             type: object
             properties: {}
@@ -819,6 +938,48 @@ components:
                     items:
                         type: integer
                         format: int32
+        api.console.passport.CurrentUserReply:
+            type: object
+            properties: {}
+        api.console.passport.LoginReply:
+            type: object
+            properties: {}
+        api.console.passport.LoginRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                    description: 用户名
+                password:
+                    type: string
+                    description: 密码
+                auto_login:
+                    type: boolean
+                    description: 自动登录
+        api.console.passport.LogoutReply:
+            type: object
+            properties: {}
+        api.console.passport.LogoutRequest:
+            type: object
+            properties: {}
+        api.console.passport.RegisterReply:
+            type: object
+            properties: {}
+        api.console.passport.RegisterRequest:
+            type: object
+            properties: {}
+        api.console.passport.ResetPasswordReply:
+            type: object
+            properties: {}
+        api.console.passport.ResetPasswordRequest:
+            type: object
+            properties: {}
+        api.console.passport.SendCaptchaReply:
+            type: object
+            properties: {}
+        api.console.passport.SendCaptchaRequest:
+            type: object
+            properties: {}
         protobuf.Pagination:
             type: object
             properties:
@@ -837,6 +998,7 @@ components:
             name: Authorization
             in: header
 tags:
+    - name: Passport
     - name: Permission
     - name: Role
     - name: User

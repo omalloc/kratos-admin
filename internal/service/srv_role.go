@@ -5,6 +5,7 @@ import (
 
 	"github.com/omalloc/contrib/protobuf"
 	"github.com/samber/lo"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "github.com/omalloc/kratos-admin/api/console/administration"
 	"github.com/omalloc/kratos-admin/internal/biz"
@@ -80,7 +81,7 @@ func (s *RoleService) ListRole(ctx context.Context, req *pb.ListRoleRequest) (*p
 		return nil, err
 	}
 	return &pb.ListRoleReply{
-		Data:       lo.Map(roles, s.toMap),
+		Data:       lo.Map(roles, s.toRoleJoinedMap),
 		Pagination: pagination.Resp(),
 	}, nil
 }
@@ -110,15 +111,38 @@ func (s *RoleService) GetAll(ctx context.Context, req *pb.GetAllRequest) (*pb.Ge
 		return nil, err
 	}
 	return &pb.GetAllReply{
-		Data: lo.Map(roles, s.toMap),
+		Data: lo.Map(roles, s.toRoleMap),
 	}, nil
 }
 
-func (s *RoleService) toMap(item *biz.Role, _ int) *pb.RoleInfo {
+func (s *RoleService) toRoleMap(item *biz.Role, _ int) *pb.RoleInfo {
 	return &pb.RoleInfo{
-		Id:       item.ID,
-		Name:     item.Name,
-		Describe: item.Describe,
-		Alias:    item.Alias,
+		Id:          item.ID,
+		Name:        item.Name,
+		Describe:    item.Describe,
+		Alias:       item.Alias,
+		Status:      int32(item.Status),
+		Permissions: lo.Map(item.Permissions, s.toPermission),
+	}
+}
+
+func (s *RoleService) toRoleJoinedMap(item *biz.RoleJoinPermission, _ int) *pb.RoleInfo {
+	return &pb.RoleInfo{
+		Id:          item.ID,
+		Name:        item.Name,
+		Describe:    item.Describe,
+		Alias:       item.Alias,
+		Status:      int32(item.Status),
+		Permissions: lo.Map(item.Permissions, s.toPermission),
+	}
+}
+func (s *RoleService) toPermission(item *biz.RolePermission, _ int) *pb.RolePermission {
+	return &pb.RolePermission{
+		Id:         item.ID,
+		RoleId:     item.RoleID,
+		PermId:     item.PermID,
+		Actions:    lo.Map(item.Actions, fromAction),
+		DataAccess: lo.Map(item.DataAccess, fromAction),
+		CreatedAt:  timestamppb.New(item.CreatedAt),
 	}
 }

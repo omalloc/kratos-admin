@@ -51,7 +51,7 @@ api:
 		--proto_path=./third_party \
 		--proto_path=$(REMOTE_PROTO_FILES) \
 		--go_out=paths=source_relative:./api \
-		--go-errors_out=paths=source_relative:. \
+		--go-errors_out=paths=source_relative:./api \
 		--go-http_out=paths=source_relative:./api \
 		--go-grpc_out=paths=source_relative:./api \
 		--openapi_out=fq_schema_naming=true,naming=proto,default_response=false:. \
@@ -63,7 +63,7 @@ api-all:
 	mkdir -p ./api/docs && protoc --proto_path=./api \
 		--proto_path=./third_party \
 		--go_out=paths=source_relative:./api \
-		--go-errors_out=paths=source_relative:. \
+		--go-errors_out=paths=source_relative:./api \
 		--go-http_out=paths=source_relative:./api \
 		--go-grpc_out=paths=source_relative:./api \
 		--openapiv2_out=./api/docs \

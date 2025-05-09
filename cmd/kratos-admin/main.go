@@ -116,7 +116,7 @@ func main() {
 		trace.WithEndpoint(bc.Tracing.GetEndpoint()),
 	)
 
-	app, cleanup, err := wireApp(&bc, bc.Server, bc.Data, logger)
+	app, cleanup, err := wireApp(&bc, bc.Server, bc.Data, bc.Passport, logger)
 	if err != nil {
 		panic(err)
 	}

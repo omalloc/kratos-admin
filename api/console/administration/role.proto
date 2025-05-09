@@ -7,6 +7,7 @@ option java_multiple_files = true;
 option java_package = "api.console.administration";
 
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 import "protobuf/pagination.proto";
 import "console/administration/permission.proto";
 
@@ -56,11 +57,18 @@ service Role {
 }
 
 message RolePermission {
+	// 业务id
 	int64 id = 1;
+	// 角色id
 	int64 role_id = 2;
+	// 权限id
 	int64 perm_id = 3;
+	// 操作权限
 	repeated Action actions = 4;
+	// 数据权限
 	repeated Action data_access = 5;
+	// 绑定权限时间
+	google.protobuf.Timestamp created_at = 6;
 }
 
 message RoleInfo {

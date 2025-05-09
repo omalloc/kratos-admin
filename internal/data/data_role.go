@@ -51,18 +51,34 @@ func (r *roleRepo) SelectID(ctx context.Context, id int64) (*biz.RoleJoinPermiss
 	return ret, err
 }
 
-func (r *roleRepo) SelectFilterList(ctx context.Context, pagination *protobuf.Pagination) ([]*biz.Role, error) {
+// func (r *roleRepo) SelectFilterList(ctx context.Context, pagination *protobuf.Pagination) ([]*biz.Role, error) {
+// 	var (
+// 		list []*biz.Role
+// 		err  error
+// 	)
+// 	err = r.txm.WithContext(ctx).Model(&biz.Role{}).
+// 		Count(pagination.Count()).
+// 		Offset(pagination.Offset()).
+// 		Limit(pagination.Limit()).
+// 		Find(&list).Error
+
+// 	return list, err
+// }
+
+func (r *roleRepo) SelectFilterList(ctx context.Context, pagination *protobuf.Pagination) ([]*biz.RoleJoinPermission, error) {
 	var (
-		list []*biz.Role
-		err  error
+		ret []*biz.RoleJoinPermission
+		err error
 	)
-	err = r.txm.WithContext(ctx).Model(&biz.Role{}).
+
+	err = r.txm.WithContext(ctx).Model(&biz.RoleJoinPermission{}).
 		Count(pagination.Count()).
 		Offset(pagination.Offset()).
 		Limit(pagination.Limit()).
-		Find(&list).Error
+		Preload(clause.Associations).
+		Find(&ret).Error
 
-	return list, err
+	return ret, err
 }
 
 func (r *roleRepo) SelectByUserID(ctx context.Context, userID int64) ([]*biz.Role, error) {

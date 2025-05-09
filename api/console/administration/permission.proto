@@ -87,11 +87,12 @@ message GetPermissionRequest {
 	int64 id = 1;
 }
 message GetPermissionReply {
-	string name = 1;
-	string alias = 2;
-	string describe = 3;
-	repeated Action actions = 4;
-	PermissionStatus status = 5;
+	int64 id = 1;
+	string name = 2;
+	string alias = 3;
+	string describe = 4;
+	repeated Action actions = 5;
+	PermissionStatus status = 6;
 }
 
 message ListPermissionRequest {

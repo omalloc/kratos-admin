@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -16,7 +18,7 @@ type EmbedEtcdServer struct {
 
 func NewEmbedEtcd() (*EmbedEtcdServer, func(), error) {
 	cfg := embed.NewConfig()
-	cfg.Dir = "default.etcd"
+	cfg.Dir = filepath.Join(os.TempDir(), "embed.etcd")
 	cfg.LogLevel = "error"
 	e, err := embed.StartEtcd(cfg)
 	if err != nil {

@@ -8,6 +8,7 @@ require (
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-kratos/kratos/v2 v2.8.4
 	github.com/go-kratos/swagger-api v1.0.1
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/gnostic v0.6.9
 	github.com/google/wire v0.6.0
 	github.com/omalloc/contrib v1.1.2-0.20250317034654-8da3d7b75f9a

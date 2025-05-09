@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package api.console.passport;
+
+option go_package = "github.com/omalloc/kratos-admin/api/console/passport;passport";
+option java_multiple_files = true;
+option java_package = "api.console.passport";
+
+import "errors/errors.proto";
+import "google/api/annotations.proto";
+
+enum ErrorReason {
+  // Set default error code.
+  option (errors.default_code) = 500;
+
+  // Set the error code separately for an enumeration.
+  USER_NOT_FOUND = 0 [(errors.code) = 404];
+
+	USER_OR_PASSWORD_ERROR = 1 [(errors.code) = 400];
+}
+
+service Passport {
+	// 登录
+	rpc Login (LoginRequest) returns (LoginReply){
+		option (google.api.http) = {
+			post: "/api/console/passport/login"
+			body: "*"
+		};
+	}
+
+	// 登出
+	rpc Logout (LogoutRequest) returns (LogoutReply){
+		option (google.api.http) = {
+			post: "/api/console/passport/logout",
+			body: "*"
+		};
+	}
+
+	// 注册
+	rpc Register (RegisterRequest) returns (RegisterReply){
+		option (google.api.http) = {
+			post: "/api/console/passport/register"
+			body: "*"
+		};
+	}
+
+	// 发送验证码
+	rpc SendCaptcha (SendCaptchaRequest) returns (SendCaptchaReply){
+		option (google.api.http) = {
+			post: "/api/console/passport/send_captcha"
+			body: "*"
+		};
+	}
+
+	// 重置密码
+	rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordReply){
+		option (google.api.http) = {
+			post: "/api/console/passport/reset_password"
+			body: "*"
+		};
+	}
+
+	// 获取当前用户信息
+	rpc CurrentUser (CurrentUserRequest) returns (CurrentUserReply){
+		option (google.api.http) = {
+			get: "/api/console/passport/current",
+		};
+	}
+	
+}	
+
+message LoginRequest {
+	// 用户名
+	string username = 1;
+	// 密码
+	string password = 2;
+	// 自动登录
+	bool auto_login = 3;
+}
+
+message LoginReply {}
+
+message LogoutRequest {}
+message LogoutReply {
+}
+
+message RegisterRequest {}
+message RegisterReply {}
+
+message SendCaptchaRequest {}
+message SendCaptchaReply {}
+
+message ResetPasswordRequest {}
+message ResetPasswordReply {}
+
+message CurrentUserRequest {}
+message CurrentUserReply {
+}

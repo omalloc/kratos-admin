@@ -42,6 +42,24 @@ func (r *userRepo) SelectUserByEmail(ctx context.Context, email string) (*biz.Us
 	return r.selectByField(ctx, "email", email)
 }
 
+// SelectUserByNameOrEmail implements biz.UserRepo.
+func (r *userRepo) SelectUserByNameOrEmail(ctx context.Context, value string) (*biz.User, error) {
+	var (
+		user biz.User
+		err  error
+	)
+
+	err = r.txm.WithContext(ctx).
+		Where(&biz.User{Username: value}).
+		Or(&biz.User{Email: value}).
+		First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, err
+}
+
 func (r *userRepo) SelectUserByID(ctx context.Context, id int64) (*biz.UserInfo, error) {
 	var ret biz.UserInfo
 
