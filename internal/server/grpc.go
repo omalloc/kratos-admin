@@ -2,7 +2,6 @@ package server
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -16,6 +15,7 @@ import (
 	passportpb "github.com/omalloc/kratos-admin/api/console/passport"
 	"github.com/omalloc/kratos-admin/internal/conf"
 	"github.com/omalloc/kratos-admin/internal/service"
+	"github.com/omalloc/kratos-admin/pkg/jwt"
 )
 
 // NewGRPCServer new a gRPC server.
@@ -33,8 +33,9 @@ func NewGRPCServer(c *conf.Server, passportc *conf.Passport, logger log.Logger,
 			metadata.Server(),
 			tracing.Server(),
 			logging.Server(logger),
+			// JWT
 			selector.Server(
-				jwt.Server(func(token *jwtv5.Token) (interface{}, error) {
+				jwt.Server(func(token *jwtv5.Token) (any, error) {
 					return []byte(passportc.Secret), nil
 				}),
 			).

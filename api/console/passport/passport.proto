@@ -8,6 +8,8 @@ option java_package = "api.console.passport";
 
 import "errors/errors.proto";
 import "google/api/annotations.proto";
+import "console/administration/user.proto";
+import "console/administration/role.proto";
 
 enum ErrorReason {
   // Set default error code.
@@ -95,4 +97,6 @@ message ResetPasswordReply {}
 
 message CurrentUserRequest {}
 message CurrentUserReply {
+	administration.UserInfo user = 1;
+	repeated administration.RoleInfo roles = 2;
 }

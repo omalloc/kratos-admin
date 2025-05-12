@@ -6,10 +6,14 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/samber/lo"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	adminpb "github.com/omalloc/kratos-admin/api/console/administration"
 	pb "github.com/omalloc/kratos-admin/api/console/passport"
 	"github.com/omalloc/kratos-admin/internal/biz"
 	"github.com/omalloc/kratos-admin/internal/conf"
+	"github.com/omalloc/kratos-admin/pkg/jwt"
 	"github.com/omalloc/kratos-admin/pkg/tokener"
 )
 
@@ -36,9 +40,7 @@ func (s *PassportService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.
 		return nil, err
 	}
 
-	token, err := s.tokener.Generate(map[string]any{
-		"uid": user.ID,
-	})
+	token, err := s.tokener.Generate(user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -64,5 +66,39 @@ func (s *PassportService) ResetPassword(ctx context.Context, req *pb.ResetPasswo
 	return &pb.ResetPasswordReply{}, nil
 }
 func (s *PassportService) CurrentUser(ctx context.Context, req *pb.CurrentUserRequest) (*pb.CurrentUserReply, error) {
-	return &pb.CurrentUserReply{}, nil
+	claims, _ := jwt.FromContext(ctx)
+
+	user, err := s.userUsecase.GetUser(ctx, claims.UID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.CurrentUserReply{
+		User: &adminpb.UserInfo{
+			Id:        user.ID,
+			Username:  user.Username,
+			Nickname:  user.Nickname,
+			Email:     user.Email,
+			Status:    adminpb.UserStatus(user.Status),
+			CreatedAt: timestamppb.New(user.CreatedAt),
+			UpdatedAt: timestamppb.New(user.UpdatedAt),
+		},
+		Roles: lo.Map(user.Roles, func(item *biz.Role, _ int) *adminpb.RoleInfo {
+			return &adminpb.RoleInfo{
+				Id:       item.ID,
+				Name:     item.Name,
+				Describe: item.Describe,
+				Status:   int32(item.Status),
+				Permissions: lo.Map(item.Permissions, func(item *biz.RolePermission, _ int) *adminpb.RolePermission {
+					return &adminpb.RolePermission{
+						Id:         item.ID,
+						RoleId:     item.RoleID,
+						PermId:     item.PermID,
+						Actions:    lo.Map(item.Actions, fromAction),
+						DataAccess: lo.Map(item.DataAccess, fromAction),
+					}
+				}),
+			}
+		}),
+	}, nil
 }

@@ -4,7 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	jwtv5 "github.com/golang-jwt/jwt/v5"
+
+	"github.com/omalloc/kratos-admin/pkg/jwt"
 )
 
 type jwtOptions struct {
@@ -52,7 +54,7 @@ func NewTokener(opts ...JwtOption) AppToken {
 }
 
 // Generate implements AppToken.
-func (j *jwtToken) Generate(payload map[string]any) (string, error) {
+func (j *jwtToken) Generate(uid int64) (string, error) {
 	if j.opts.secret == "" {
 		return "", errors.New("secret is required")
 	}
@@ -61,23 +63,24 @@ func (j *jwtToken) Generate(payload map[string]any) (string, error) {
 		return "", errors.New("ttl must be greater than 0")
 	}
 
-	iat := time.Now().Unix()
+	iat := time.Now()
 
-	claims := make(jwt.MapClaims)
-	claims["exp"] = iat + int64(j.opts.ttl/time.Second)
-	claims["iat"] = iat
+	claims := &jwt.AppClaims{
+		RegisteredClaims: jwtv5.RegisteredClaims{
+			ExpiresAt: jwtv5.NewNumericDate(iat.Add(j.opts.ttl)),
+			IssuedAt:  jwtv5.NewNumericDate(iat),
+		},
+		UID: uid,
+	}
 
-	j.mergeClaimsPayload(claims, j.opts.payload)
-	j.mergeClaimsPayload(claims, payload)
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, claims)
 	return token.SignedString([]byte(j.opts.secret))
 }
 
 // Parse implements AppToken.
-func (j *jwtToken) Parse(tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+func (j *jwtToken) Parse(tokenString string) (*jwt.AppClaims, error) {
+	token, err := jwtv5.Parse(tokenString, func(token *jwtv5.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwtv5.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
 		return []byte(j.opts.secret), nil
@@ -87,15 +90,12 @@ func (j *jwtToken) Parse(tokenString string) (jwt.MapClaims, error) {
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	if claims, ok := token.Claims.(*jwt.AppClaims); ok && token.Valid {
 		return claims, nil
 	}
 
 	return nil, errors.New("invalid token")
 }
 
-func (j *jwtToken) mergeClaimsPayload(claims jwt.MapClaims, payload map[string]any) {
-	for k, v := range payload {
-		claims[k] = v
-	}
+func (j *jwtToken) mergeClaimsPayload(claims *jwt.AppClaims, payload map[string]any) {
 }

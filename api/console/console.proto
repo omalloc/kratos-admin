@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package api.console;
 
-option go_package = "github.com/omalloc/kratos-console/api/console;console";
+option go_package = "github.com/omalloc/kratos-admin/api/console;console";
 option java_multiple_files = true;
 option java_package = "api.console";
 

@@ -1,8 +1,8 @@
 package tokener
 
-import "github.com/golang-jwt/jwt/v5"
+import "github.com/omalloc/kratos-admin/pkg/jwt"
 
 type AppToken interface {
-	Generate(payload map[string]any) (string, error)
-	Parse(tokenString string) (jwt.MapClaims, error)
+	Generate(subjet int64) (string, error)
+	Parse(tokenString string) (*jwt.AppClaims, error)
 }
