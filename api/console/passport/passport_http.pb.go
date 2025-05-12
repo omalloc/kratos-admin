@@ -25,6 +25,9 @@ const OperationPassportLogout = "/api.console.passport.Passport/Logout"
 const OperationPassportRegister = "/api.console.passport.Passport/Register"
 const OperationPassportResetPassword = "/api.console.passport.Passport/ResetPassword"
 const OperationPassportSendCaptcha = "/api.console.passport.Passport/SendCaptcha"
+const OperationPassportSendResetPassword = "/api.console.passport.Passport/SendResetPassword"
+const OperationPassportUpdateProfile = "/api.console.passport.Passport/UpdateProfile"
+const OperationPassportUpdateUsername = "/api.console.passport.Passport/UpdateUsername"
 
 type PassportHTTPServer interface {
 	// CurrentUser 获取当前用户信息
@@ -39,6 +42,12 @@ type PassportHTTPServer interface {
 	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordReply, error)
 	// SendCaptcha 发送验证码
 	SendCaptcha(context.Context, *SendCaptchaRequest) (*SendCaptchaReply, error)
+	// SendResetPassword 发送重置密码验证码
+	SendResetPassword(context.Context, *SendResetPasswordCaptchaRequest) (*SendResetPasswordCaptchaReply, error)
+	// UpdateProfile 更新用户信息
+	UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileReply, error)
+	// UpdateUsername 更新用户名
+	UpdateUsername(context.Context, *UpdateUsernameRequest) (*UpdateUsernameReply, error)
 }
 
 func RegisterPassportHTTPServer(s *http.Server, srv PassportHTTPServer) {
@@ -47,7 +56,10 @@ func RegisterPassportHTTPServer(s *http.Server, srv PassportHTTPServer) {
 	r.POST("/api/console/passport/logout", _Passport_Logout0_HTTP_Handler(srv))
 	r.POST("/api/console/passport/register", _Passport_Register0_HTTP_Handler(srv))
 	r.POST("/api/console/passport/send_captcha", _Passport_SendCaptcha0_HTTP_Handler(srv))
+	r.POST("/api/console/passport/send_reset_password", _Passport_SendResetPassword0_HTTP_Handler(srv))
 	r.POST("/api/console/passport/reset_password", _Passport_ResetPassword0_HTTP_Handler(srv))
+	r.POST("/api/console/passport/{id}/username", _Passport_UpdateUsername0_HTTP_Handler(srv))
+	r.POST("/api/console/passport/profile", _Passport_UpdateProfile0_HTTP_Handler(srv))
 	r.GET("/api/console/passport/current", _Passport_CurrentUser0_HTTP_Handler(srv))
 }
 
@@ -139,6 +151,28 @@ func _Passport_SendCaptcha0_HTTP_Handler(srv PassportHTTPServer) func(ctx http.C
 	}
 }
 
+func _Passport_SendResetPassword0_HTTP_Handler(srv PassportHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SendResetPasswordCaptchaRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPassportSendResetPassword)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SendResetPassword(ctx, req.(*SendResetPasswordCaptchaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*SendResetPasswordCaptchaReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _Passport_ResetPassword0_HTTP_Handler(srv PassportHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in ResetPasswordRequest
@@ -157,6 +191,53 @@ func _Passport_ResetPassword0_HTTP_Handler(srv PassportHTTPServer) func(ctx http
 			return err
 		}
 		reply := out.(*ResetPasswordReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Passport_UpdateUsername0_HTTP_Handler(srv PassportHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateUsernameRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPassportUpdateUsername)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateUsername(ctx, req.(*UpdateUsernameRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateUsernameReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Passport_UpdateProfile0_HTTP_Handler(srv PassportHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateProfileRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPassportUpdateProfile)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateProfile(ctx, req.(*UpdateProfileRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateProfileReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -187,6 +268,9 @@ type PassportHTTPClient interface {
 	Register(ctx context.Context, req *RegisterRequest, opts ...http.CallOption) (rsp *RegisterReply, err error)
 	ResetPassword(ctx context.Context, req *ResetPasswordRequest, opts ...http.CallOption) (rsp *ResetPasswordReply, err error)
 	SendCaptcha(ctx context.Context, req *SendCaptchaRequest, opts ...http.CallOption) (rsp *SendCaptchaReply, err error)
+	SendResetPassword(ctx context.Context, req *SendResetPasswordCaptchaRequest, opts ...http.CallOption) (rsp *SendResetPasswordCaptchaReply, err error)
+	UpdateProfile(ctx context.Context, req *UpdateProfileRequest, opts ...http.CallOption) (rsp *UpdateProfileReply, err error)
+	UpdateUsername(ctx context.Context, req *UpdateUsernameRequest, opts ...http.CallOption) (rsp *UpdateUsernameReply, err error)
 }
 
 type PassportHTTPClientImpl struct {
@@ -267,6 +351,45 @@ func (c *PassportHTTPClientImpl) SendCaptcha(ctx context.Context, in *SendCaptch
 	pattern := "/api/console/passport/send_captcha"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPassportSendCaptcha))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PassportHTTPClientImpl) SendResetPassword(ctx context.Context, in *SendResetPasswordCaptchaRequest, opts ...http.CallOption) (*SendResetPasswordCaptchaReply, error) {
+	var out SendResetPasswordCaptchaReply
+	pattern := "/api/console/passport/send_reset_password"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPassportSendResetPassword))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PassportHTTPClientImpl) UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...http.CallOption) (*UpdateProfileReply, error) {
+	var out UpdateProfileReply
+	pattern := "/api/console/passport/profile"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPassportUpdateProfile))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PassportHTTPClientImpl) UpdateUsername(ctx context.Context, in *UpdateUsernameRequest, opts ...http.CallOption) (*UpdateUsernameReply, error) {
+	var out UpdateUsernameReply
+	pattern := "/api/console/passport/{id}/username"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPassportUpdateUsername))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

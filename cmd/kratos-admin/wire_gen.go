@@ -63,7 +63,7 @@ func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.
 	permissionRepo := data.NewPermissionRepo(transaction)
 	permissionUsecase := biz.NewPermissionUsecase(transaction, permissionRepo)
 	permissionService := service.NewPermissionService(permissionUsecase)
-	passportService := service.NewPassportService(bootstrap, userUsecase)
+	passportService := service.NewPassportService(bootstrap, userUsecase, client)
 	grpcServer := server.NewGRPCServer(confServer, passport, logger, consoleService, userService, roleService, permissionService, passportService)
 	httpServer := server.NewHTTPServer(confServer, passport, logger, userService, roleService, permissionService, passportService)
 	v := server.NewChecker(dataData, client)

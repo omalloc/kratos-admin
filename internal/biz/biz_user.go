@@ -230,3 +230,25 @@ func (uc *UserUsecase) Login(ctx context.Context, username string, password stri
 
 	return user, nil
 }
+
+func (uc *UserUsecase) UpdatePassword(ctx context.Context, email string, password string) error {
+	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
+		user, err := uc.userRepo.SelectUserByEmail(ctx, email)
+		if err != nil {
+			return err
+		}
+
+		buf, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+
+		newPassword := string(buf)
+		if user.Password == newPassword {
+			return errors.New(400, "NEW_PASSWORD_SAME_AS_OLD", "新密码与旧密码相同")
+		}
+
+		user.Password = newPassword
+		return uc.userRepo.Update(ctx, user.ID, user)
+	})
+}

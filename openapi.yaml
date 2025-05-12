@@ -65,6 +65,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.passport.LogoutReply'
+    /api/console/passport/profile:
+        post:
+            tags:
+                - Passport
+            description: 更新用户信息
+            operationId: Passport_UpdateProfile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.passport.UpdateProfileRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.passport.UpdateProfileReply'
     /api/console/passport/register:
         post:
             tags:
@@ -122,6 +141,50 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.passport.SendCaptchaReply'
+    /api/console/passport/send_reset_password:
+        post:
+            tags:
+                - Passport
+            description: 发送重置密码验证码
+            operationId: Passport_SendResetPassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.passport.SendResetPasswordCaptchaRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.passport.SendResetPasswordCaptchaReply'
+    /api/console/passport/{id}/username:
+        post:
+            tags:
+                - Passport
+            description: 更新用户名
+            operationId: Passport_UpdateUsername
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.passport.UpdateUsernameRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.passport.UpdateUsernameReply'
     /api/console/permission:
         get:
             tags:
@@ -973,19 +1036,71 @@ components:
             properties: {}
         api.console.passport.RegisterRequest:
             type: object
-            properties: {}
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                email:
+                    type: string
+                captcha:
+                    type: string
         api.console.passport.ResetPasswordReply:
             type: object
             properties: {}
         api.console.passport.ResetPasswordRequest:
             type: object
-            properties: {}
+            properties:
+                token:
+                    type: string
+                    description: 重置密码令牌
+                email:
+                    type: string
+                    description: 邮箱
+                password:
+                    type: string
+                    description: 密码
         api.console.passport.SendCaptchaReply:
             type: object
             properties: {}
         api.console.passport.SendCaptchaRequest:
             type: object
+            properties:
+                type:
+                    type: integer
+                    format: enum
+                from:
+                    type: string
+        api.console.passport.SendResetPasswordCaptchaReply:
+            type: object
             properties: {}
+        api.console.passport.SendResetPasswordCaptchaRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+        api.console.passport.UpdateProfileReply:
+            type: object
+            properties: {}
+        api.console.passport.UpdateProfileRequest:
+            type: object
+            properties:
+                nickname:
+                    type: string
+                bio:
+                    type: string
+                avatar:
+                    type: string
+        api.console.passport.UpdateUsernameReply:
+            type: object
+            properties: {}
+        api.console.passport.UpdateUsernameRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                username:
+                    type: string
         protobuf.Pagination:
             type: object
             properties:

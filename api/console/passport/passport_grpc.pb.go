@@ -19,12 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Passport_Login_FullMethodName         = "/api.console.passport.Passport/Login"
-	Passport_Logout_FullMethodName        = "/api.console.passport.Passport/Logout"
-	Passport_Register_FullMethodName      = "/api.console.passport.Passport/Register"
-	Passport_SendCaptcha_FullMethodName   = "/api.console.passport.Passport/SendCaptcha"
-	Passport_ResetPassword_FullMethodName = "/api.console.passport.Passport/ResetPassword"
-	Passport_CurrentUser_FullMethodName   = "/api.console.passport.Passport/CurrentUser"
+	Passport_Login_FullMethodName             = "/api.console.passport.Passport/Login"
+	Passport_Logout_FullMethodName            = "/api.console.passport.Passport/Logout"
+	Passport_Register_FullMethodName          = "/api.console.passport.Passport/Register"
+	Passport_SendCaptcha_FullMethodName       = "/api.console.passport.Passport/SendCaptcha"
+	Passport_SendResetPassword_FullMethodName = "/api.console.passport.Passport/SendResetPassword"
+	Passport_ResetPassword_FullMethodName     = "/api.console.passport.Passport/ResetPassword"
+	Passport_UpdateUsername_FullMethodName    = "/api.console.passport.Passport/UpdateUsername"
+	Passport_UpdateProfile_FullMethodName     = "/api.console.passport.Passport/UpdateProfile"
+	Passport_CurrentUser_FullMethodName       = "/api.console.passport.Passport/CurrentUser"
 )
 
 // PassportClient is the client API for Passport service.
@@ -39,8 +42,14 @@ type PassportClient interface {
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterReply, error)
 	// 发送验证码
 	SendCaptcha(ctx context.Context, in *SendCaptchaRequest, opts ...grpc.CallOption) (*SendCaptchaReply, error)
+	// 发送重置密码验证码
+	SendResetPassword(ctx context.Context, in *SendResetPasswordCaptchaRequest, opts ...grpc.CallOption) (*SendResetPasswordCaptchaReply, error)
 	// 重置密码
 	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetPasswordReply, error)
+	// 更新用户名
+	UpdateUsername(ctx context.Context, in *UpdateUsernameRequest, opts ...grpc.CallOption) (*UpdateUsernameReply, error)
+	// 更新用户信息
+	UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UpdateProfileReply, error)
 	// 获取当前用户信息
 	CurrentUser(ctx context.Context, in *CurrentUserRequest, opts ...grpc.CallOption) (*CurrentUserReply, error)
 }
@@ -93,10 +102,40 @@ func (c *passportClient) SendCaptcha(ctx context.Context, in *SendCaptchaRequest
 	return out, nil
 }
 
+func (c *passportClient) SendResetPassword(ctx context.Context, in *SendResetPasswordCaptchaRequest, opts ...grpc.CallOption) (*SendResetPasswordCaptchaReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendResetPasswordCaptchaReply)
+	err := c.cc.Invoke(ctx, Passport_SendResetPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *passportClient) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetPasswordReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResetPasswordReply)
 	err := c.cc.Invoke(ctx, Passport_ResetPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *passportClient) UpdateUsername(ctx context.Context, in *UpdateUsernameRequest, opts ...grpc.CallOption) (*UpdateUsernameReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUsernameReply)
+	err := c.cc.Invoke(ctx, Passport_UpdateUsername_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *passportClient) UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UpdateProfileReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateProfileReply)
+	err := c.cc.Invoke(ctx, Passport_UpdateProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -125,8 +164,14 @@ type PassportServer interface {
 	Register(context.Context, *RegisterRequest) (*RegisterReply, error)
 	// 发送验证码
 	SendCaptcha(context.Context, *SendCaptchaRequest) (*SendCaptchaReply, error)
+	// 发送重置密码验证码
+	SendResetPassword(context.Context, *SendResetPasswordCaptchaRequest) (*SendResetPasswordCaptchaReply, error)
 	// 重置密码
 	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordReply, error)
+	// 更新用户名
+	UpdateUsername(context.Context, *UpdateUsernameRequest) (*UpdateUsernameReply, error)
+	// 更新用户信息
+	UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileReply, error)
 	// 获取当前用户信息
 	CurrentUser(context.Context, *CurrentUserRequest) (*CurrentUserReply, error)
 	mustEmbedUnimplementedPassportServer()
@@ -151,8 +196,17 @@ func (UnimplementedPassportServer) Register(context.Context, *RegisterRequest) (
 func (UnimplementedPassportServer) SendCaptcha(context.Context, *SendCaptchaRequest) (*SendCaptchaReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendCaptcha not implemented")
 }
+func (UnimplementedPassportServer) SendResetPassword(context.Context, *SendResetPasswordCaptchaRequest) (*SendResetPasswordCaptchaReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendResetPassword not implemented")
+}
 func (UnimplementedPassportServer) ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResetPassword not implemented")
+}
+func (UnimplementedPassportServer) UpdateUsername(context.Context, *UpdateUsernameRequest) (*UpdateUsernameReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUsername not implemented")
+}
+func (UnimplementedPassportServer) UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateProfile not implemented")
 }
 func (UnimplementedPassportServer) CurrentUser(context.Context, *CurrentUserRequest) (*CurrentUserReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CurrentUser not implemented")
@@ -250,6 +304,24 @@ func _Passport_SendCaptcha_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Passport_SendResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendResetPasswordCaptchaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PassportServer).SendResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Passport_SendResetPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PassportServer).SendResetPassword(ctx, req.(*SendResetPasswordCaptchaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Passport_ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ResetPasswordRequest)
 	if err := dec(in); err != nil {
@@ -264,6 +336,42 @@ func _Passport_ResetPassword_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PassportServer).ResetPassword(ctx, req.(*ResetPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Passport_UpdateUsername_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUsernameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PassportServer).UpdateUsername(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Passport_UpdateUsername_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PassportServer).UpdateUsername(ctx, req.(*UpdateUsernameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Passport_UpdateProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PassportServer).UpdateProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Passport_UpdateProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PassportServer).UpdateProfile(ctx, req.(*UpdateProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -310,8 +418,20 @@ var Passport_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Passport_SendCaptcha_Handler,
 		},
 		{
+			MethodName: "SendResetPassword",
+			Handler:    _Passport_SendResetPassword_Handler,
+		},
+		{
 			MethodName: "ResetPassword",
 			Handler:    _Passport_ResetPassword_Handler,
+		},
+		{
+			MethodName: "UpdateUsername",
+			Handler:    _Passport_UpdateUsername_Handler,
+		},
+		{
+			MethodName: "UpdateProfile",
+			Handler:    _Passport_UpdateProfile_Handler,
 		},
 		{
 			MethodName: "CurrentUser",
