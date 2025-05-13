@@ -128,15 +128,17 @@ message ListRoleReply {
 }
 
 message BindPermissionRequest {
+	message BindPermissionBody {
+		int64 permission_id = 2;
+		repeated Action actions = 3;
+		repeated Action data_access = 4;
+	}
+
 	int64 id = 1;
-	repeated BindPermissionBodyRequest data = 2;
+	repeated BindPermissionBody data = 2;
 }
 
-message BindPermissionBodyRequest {
-	int64 permission_id = 2;
-	repeated Action actions = 3;
-	repeated Action data_access = 4;
-}
+
 message BindPermissionReply {}
 
 
