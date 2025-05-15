@@ -52,13 +52,14 @@ service Passport {
 		};
 	}
 
-	// 刷新令牌
-	rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenReply){
-		option (google.api.http) = {
-			post: "/api/console/passport/refresh_token"
-			body: "*"
-		};
-	}
+	// 刷新令牌 deprecated
+	// 废弃原因： 令牌刷新功能直接实现到 jwt middleware 中
+	// rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenReply){
+	// 	option (google.api.http) = {
+	// 		post: "/api/console/passport/refresh_token"
+	// 		body: "*"
+	// 	};
+	// }
 
 	// 发送验证码
 	rpc SendCaptcha (SendCaptchaRequest) returns (SendCaptchaReply){
@@ -124,10 +125,16 @@ message LogoutRequest {}
 message LogoutReply {}
 
 message RegisterRequest {
+	// 用户名
 	string username = 1;
-	string password = 2;
-	string email = 3;
-	string captcha = 4;
+	// 昵称
+	string nickname = 2;
+	// 密码
+	string password = 3;
+	// 邮箱
+	string email = 4;
+	// 验证码
+	string captcha = 5;
 }
 
 message RegisterReply {}

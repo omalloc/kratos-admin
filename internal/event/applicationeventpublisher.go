@@ -17,7 +17,7 @@ type ApplicationEventPublisher struct {
 
 func NewApplicationEventPublisher() *ApplicationEventPublisher {
 	return &ApplicationEventPublisher{
-		publisher: gochannel.NewGoChannel(gochannel.Config{}, watermill.NewSlogLogger(nil)),
+		publisher: gochannel.NewGoChannel(gochannel.Config{}, watermill.NopLogger{}),
 	}
 }
 

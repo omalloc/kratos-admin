@@ -27,6 +27,7 @@ func NewWhiteListMatcher() selector.MatchFunc {
 	whiteList[passportpb.OperationPassportRegister] = struct{}{}
 	whiteList[passportpb.OperationPassportResetPassword] = struct{}{}
 	whiteList[passportpb.OperationPassportSendCaptcha] = struct{}{}
+	whiteList[passportpb.OperationPassportSendResetPassword] = struct{}{}
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {
 			return false

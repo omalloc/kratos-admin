@@ -1039,12 +1039,19 @@ components:
             properties:
                 username:
                     type: string
+                    description: 用户名
+                nickname:
+                    type: string
+                    description: 昵称
                 password:
                     type: string
+                    description: 密码
                 email:
                     type: string
+                    description: 邮箱
                 captcha:
                     type: string
+                    description: 验证码
         api.console.passport.ResetPasswordReply:
             type: object
             properties: {}
