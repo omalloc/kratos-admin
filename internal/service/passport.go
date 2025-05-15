@@ -108,6 +108,7 @@ func (s *PassportService) Register(ctx context.Context, req *pb.RegisterRequest)
 
 	nickname := generateCaptcha(6) // 游客用户
 	s.userUsecase.CreateUser(ctx, &biz.User{
+		Username: req.Username,
 		Email:    req.Email,
 		Nickname: fmt.Sprintf("游客用户%s", nickname),
 		Password: req.Password,

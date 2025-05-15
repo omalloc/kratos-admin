@@ -69,6 +69,7 @@ func (r *userRepo) SelectUserByID(ctx context.Context, id int64) (*biz.UserInfo,
 		Joins("LEFT JOIN users_bind_role ON users.id = users_bind_role.user_id").
 		Joins("LEFT JOIN roles ON users_bind_role.role_id = roles.id").
 		Where("users.id = ?", id).
+		Group("users.id").
 		First(&ret).Error
 
 	return &ret, err
