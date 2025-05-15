@@ -52,6 +52,14 @@ service Passport {
 		};
 	}
 
+	// 刷新令牌
+	rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenReply){
+		option (google.api.http) = {
+			post: "/api/console/passport/refresh_token"
+			body: "*"
+		};
+	}
+
 	// 发送验证码
 	rpc SendCaptcha (SendCaptchaRequest) returns (SendCaptchaReply){
 		option (google.api.http) = {

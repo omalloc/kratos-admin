@@ -9,7 +9,7 @@ tracing:
 data:
   database:
     driver: sqlite
-    source: kratos.db?cache=shared&mode=rwc&_journal_mode=WAL&_pragma=journal_mode(WAL)&charset=utf8mb4&parseTime=true&loc=Local
+    source: ./bin/kratos.db?cache=shared&mode=rwc&_journal_mode=WAL&_pragma=journal_mode(WAL)&charset=utf8mb4&parseTime=true&loc=Local
     # source: :memory:?cache=shared&mode=memory&charset=utf8mb4&parseTime=true&loc=Local
   redis:
     addr: 127.0.0.1:6379

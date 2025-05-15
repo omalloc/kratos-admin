@@ -8,9 +8,10 @@ import (
 	"github.com/omalloc/contrib/kratos/health"
 	"github.com/omalloc/contrib/kratos/registry"
 	"github.com/omalloc/contrib/protobuf"
+	clientv3 "go.etcd.io/etcd/client/v3"
+
 	"github.com/omalloc/kratos-admin/internal/conf"
 	"github.com/omalloc/kratos-admin/internal/data"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // ProviderSet is server providers.

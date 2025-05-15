@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -52,8 +53,9 @@ type Option func(*options)
 
 // Parser is a jwt parser
 type options struct {
-	signingMethod jwt.SigningMethod
-	tokenHeader   map[string]any
+	signingMethod  jwt.SigningMethod
+	tokenHeader    map[string]any
+	maxRefreshTime time.Duration // 最大刷新事件
 }
 
 // WithSigningMethod with signing method option.
@@ -70,14 +72,30 @@ func WithTokenHeader(header map[string]any) Option {
 	}
 }
 
+// WithMaxRefresh 设置最大刷新时间
+func WithMaxRefresh(maxRefreshTime time.Duration) Option {
+	return func(o *options) {
+		o.maxRefreshTime = maxRefreshTime
+	}
+}
+
 // Server is a server auth middleware. Check the token and extract the info from token.
 func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
-		signingMethod: jwt.SigningMethodHS256,
+		signingMethod:  jwt.SigningMethodHS256,
+		maxRefreshTime: 7 * 24 * time.Hour, // 7天
 	}
 	for _, opt := range opts {
 		opt(o)
 	}
+
+	// got, _ := keyFunc(nil)
+
+	// refreshToken := func(claims *AppClaims) (string, error) {
+	// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// 	return token.SignedString(got)
+	// }
+
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req any) (any, error) {
 			if header, ok := transport.FromServerContext(ctx); ok {
@@ -98,8 +116,21 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					if errors.Is(err, jwt.ErrTokenMalformed) || errors.Is(err, jwt.ErrTokenUnverifiable) {
 						return nil, ErrTokenInvalid
 					}
-					if errors.Is(err, jwt.ErrTokenNotValidYet) || errors.Is(err, jwt.ErrTokenExpired) {
-						return nil, ErrTokenExpired
+					if errors.Is(err, jwt.ErrTokenNotValidYet) {
+						return nil, err
+					}
+					if errors.Is(err, jwt.ErrTokenExpired) {
+						// 检查是否过了【最大允许刷新的时间】
+						// 首次签名时间 + 最大允许刷新时间区间 > 当前时间 ====> 首次签名时间 > 当前时间 - 最大允许刷新时间区间
+						issuedAt, _ := tokenInfo.Claims.GetIssuedAt()
+						if issuedAt.Unix() > time.Now().Add(-o.maxRefreshTime).Unix() {
+							// 此时并没有过最大允许刷新时间，因此可以重新颁发 token
+							// 在这里重新赋值一下过期时间 ExpiresAt 从而达到刷新 token 的目的
+							// 但是需要注意的是：一定不能更改 IssuedAt，因为这个字段是用来判断是否过了最大允许刷新时间的
+							// refreshToken()
+						}
+
+						// 尝试刷新令牌
 					}
 					return nil, ErrTokenParseFail
 				}

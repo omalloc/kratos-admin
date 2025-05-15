@@ -19,6 +19,7 @@ import (
 	"go.uber.org/automaxprocs/maxprocs"
 
 	"github.com/omalloc/kratos-admin/internal/conf"
+	"github.com/omalloc/kratos-admin/internal/event"
 	"github.com/omalloc/kratos-admin/internal/server"
 	_ "github.com/omalloc/kratos-admin/pkg/gorm-schema"
 )
@@ -54,7 +55,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 }
 
-func newApp(logger log.Logger, embedEtcd *server.EmbedEtcdServer, registrar registry.Registrar, gs *grpc.Server, hs *http.Server, hh *health.Server) *kratos.App {
+func newApp(logger log.Logger, applicationEventPublisher *event.ApplicationEventPublisher, embedEtcd *server.EmbedEtcdServer, registrar registry.Registrar, gs *grpc.Server, hs *http.Server, hh *health.Server) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -69,6 +70,7 @@ func newApp(logger log.Logger, embedEtcd *server.EmbedEtcdServer, registrar regi
 			hs,
 			hh,
 			embedEtcd,
+			applicationEventPublisher,
 		),
 	)
 }

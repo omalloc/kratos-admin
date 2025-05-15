@@ -16,6 +16,7 @@ import (
 	"github.com/omalloc/kratos-admin/internal/conf"
 	"github.com/omalloc/kratos-admin/internal/data"
 	"github.com/omalloc/kratos-admin/internal/discovery"
+	"github.com/omalloc/kratos-admin/internal/event"
 	"github.com/omalloc/kratos-admin/internal/server"
 	"github.com/omalloc/kratos-admin/internal/service"
 )
@@ -28,6 +29,7 @@ import (
 
 // wireApp init kratos application.
 func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.Data, passport *conf.Passport, logger log.Logger) (*kratos.App, func(), error) {
+	applicationEventPublisher := event.NewApplicationEventPublisher()
 	embedEtcdServer, cleanup, err := server.NewEmbedEtcd()
 	if err != nil {
 		return nil, nil, err
@@ -63,12 +65,12 @@ func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.
 	permissionRepo := data.NewPermissionRepo(transaction)
 	permissionUsecase := biz.NewPermissionUsecase(transaction, permissionRepo)
 	permissionService := service.NewPermissionService(permissionUsecase)
-	passportService := service.NewPassportService(bootstrap, userUsecase, client)
+	passportService := service.NewPassportService(bootstrap, applicationEventPublisher, userUsecase, client)
 	grpcServer := server.NewGRPCServer(confServer, passport, logger, consoleService, userService, roleService, permissionService, passportService)
 	httpServer := server.NewHTTPServer(confServer, passport, logger, userService, roleService, permissionService, passportService)
 	v := server.NewChecker(dataData, client)
 	healthServer := health.NewServer(v, logger, httpServer)
-	app := newApp(logger, embedEtcdServer, registrar, grpcServer, httpServer, healthServer)
+	app := newApp(logger, applicationEventPublisher, embedEtcdServer, registrar, grpcServer, httpServer, healthServer)
 	return app, func() {
 		cleanup3()
 		cleanup2()

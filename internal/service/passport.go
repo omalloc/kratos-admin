@@ -17,6 +17,7 @@ import (
 	pb "github.com/omalloc/kratos-admin/api/console/passport"
 	"github.com/omalloc/kratos-admin/internal/biz"
 	"github.com/omalloc/kratos-admin/internal/conf"
+	"github.com/omalloc/kratos-admin/internal/event"
 	"github.com/omalloc/kratos-admin/pkg/jwt"
 	"github.com/omalloc/kratos-admin/pkg/tokener"
 )
@@ -26,14 +27,16 @@ const defaultCaptchaLen = 6
 type PassportService struct {
 	pb.UnimplementedPassportServer
 
-	userUsecase *biz.UserUsecase
-	tokener     tokener.AppToken
-	etcdClient  *clientv3.Client
+	userUsecase               *biz.UserUsecase
+	tokener                   tokener.AppToken
+	etcdClient                *clientv3.Client
+	applicationEventPublisher *event.ApplicationEventPublisher
 }
 
-func NewPassportService(c *conf.Bootstrap, userUsecase *biz.UserUsecase, etcdClient *clientv3.Client) *PassportService {
+func NewPassportService(c *conf.Bootstrap, applicationEventPublisher *event.ApplicationEventPublisher, userUsecase *biz.UserUsecase, etcdClient *clientv3.Client) *PassportService {
 	return &PassportService{
-		userUsecase: userUsecase,
+		applicationEventPublisher: applicationEventPublisher,
+		userUsecase:               userUsecase,
 		tokener: tokener.NewTokener(
 			tokener.WithTTL(time.Hour),
 			tokener.WithSecret(c.Passport.Secret),
@@ -46,6 +49,7 @@ func NewPassportService(c *conf.Bootstrap, userUsecase *biz.UserUsecase, etcdCli
 func (s *PassportService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginReply, error) {
 	user, err := s.userUsecase.Login(ctx, req.Username, req.Password, req.AutoLogin)
 	if err != nil {
+		s.applicationEventPublisher.Publish(ctx, "passport.login.failed", event.NewMessage(event.NewUUID(), []byte(err.Error())))
 		return nil, err
 	}
 
@@ -54,12 +58,13 @@ func (s *PassportService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.
 		return nil, err
 	}
 
+	s.applicationEventPublisher.Publish(ctx, "passport.login.token-generated", event.NewMessage(event.NewUUID(), []byte(token)))
 	tr, ok := transport.FromServerContext(ctx)
 	if ok {
 		tr.ReplyHeader().Add("Authorization", token)
 	}
 
-	log.Infof("audit -> login user: %+v", user)
+	s.applicationEventPublisher.Publish(ctx, "passport.login.success", event.NewMessage(event.NewUUID(), event.Marshal(user)))
 	return &pb.LoginReply{}, nil
 }
 
@@ -68,6 +73,7 @@ func (s *PassportService) Logout(ctx context.Context, req *pb.LogoutRequest) (*p
 	claims, _ := jwt.FromContext(ctx)
 	_, _ = s.etcdClient.Delete(ctx, fmt.Sprintf("/app/auth_token/%d", claims.UID))
 
+	s.applicationEventPublisher.Publish(ctx, "passport.logout.success", event.NewMessage(event.NewUUID(), []byte(fmt.Sprintf("%d", claims.UID))))
 	return &pb.LogoutReply{}, nil
 }
 
@@ -94,7 +100,7 @@ func (s *PassportService) SendCaptcha(ctx context.Context, req *pb.SendCaptchaRe
 		_, _ = s.etcdClient.Put(ctx, key, code, clientv3.WithLease(lease.ID))
 	}
 
-	log.Infof("[DEBUG] audit -> send captcha to user: %d, code: %s", claims.UID, code)
+	log.Infof("send captcha to user: %d, code: %s", claims.UID, code)
 
 	return &pb.SendCaptchaReply{}, nil
 }
