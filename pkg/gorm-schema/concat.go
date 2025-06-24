@@ -27,6 +27,13 @@ func (g *StringSlice[T]) Scan(ctx context.Context, field *schema.Field, dst refl
 			vv, _ := strconv.ParseInt(item, 10, 64)
 			return T(vv)
 		})
+	case []byte:
+		// Handle byte array by converting to string first
+		strValue := string(v)
+		*g = lo.Map(strings.Split(strValue, ","), func(item string, _ int) T {
+			vv, _ := strconv.ParseInt(item, 10, 64)
+			return T(vv)
+		})
 	default:
 		*g = []T{}
 	}
@@ -51,6 +58,14 @@ func (StringSliceSerializer) Scan(ctx context.Context, field *schema.Field, dst 
 		switch v := dbValue.(type) {
 		case string:
 			intSlice := lo.Map(strings.Split(v, ","), func(item string, _ int) int64 {
+				vv, _ := strconv.ParseInt(item, 10, 64)
+				return vv
+			})
+			fieldValue.Elem().Set(reflect.ValueOf(intSlice))
+		case []byte:
+			// Handle byte array by converting to string first
+			strValue := string(v)
+			intSlice := lo.Map(strings.Split(strValue, ","), func(item string, _ int) int64 {
 				vv, _ := strconv.ParseInt(item, 10, 64)
 				return vv
 			})
