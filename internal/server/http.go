@@ -43,6 +43,7 @@ func NewHTTPServer(c *conf.Server, passportc *conf.Passport, logger log.Logger,
 	role *service.RoleService,
 	permission *service.PermissionService,
 	passport *service.PassportService,
+	menu *service.MenuService,
 ) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -73,6 +74,7 @@ func NewHTTPServer(c *conf.Server, passportc *conf.Passport, logger log.Logger,
 	adminpb.RegisterUserHTTPServer(srv, user)
 	adminpb.RegisterRoleHTTPServer(srv, role)
 	adminpb.RegisterPermissionHTTPServer(srv, permission)
+	adminpb.RegisterMenuHTTPServer(srv, menu)
 	passportpb.RegisterPassportHTTPServer(srv, passport)
 	return srv
 }

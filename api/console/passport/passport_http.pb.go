@@ -19,6 +19,7 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationPassportAuthorizeMenu = "/api.console.passport.Passport/AuthorizeMenu"
 const OperationPassportCurrentUser = "/api.console.passport.Passport/CurrentUser"
 const OperationPassportLogin = "/api.console.passport.Passport/Login"
 const OperationPassportLogout = "/api.console.passport.Passport/Logout"
@@ -30,6 +31,8 @@ const OperationPassportUpdateProfile = "/api.console.passport.Passport/UpdatePro
 const OperationPassportUpdateUsername = "/api.console.passport.Passport/UpdateUsername"
 
 type PassportHTTPServer interface {
+	// AuthorizeMenu 获取授权的菜单
+	AuthorizeMenu(context.Context, *AuthorizeMenuRequest) (*AuthorizeMenuReply, error)
 	// CurrentUser 获取当前用户信息
 	CurrentUser(context.Context, *CurrentUserRequest) (*CurrentUserReply, error)
 	// Login 登录
@@ -61,6 +64,7 @@ func RegisterPassportHTTPServer(s *http.Server, srv PassportHTTPServer) {
 	r.POST("/api/console/passport/{id}/username", _Passport_UpdateUsername0_HTTP_Handler(srv))
 	r.POST("/api/console/passport/profile", _Passport_UpdateProfile0_HTTP_Handler(srv))
 	r.GET("/api/console/passport/current", _Passport_CurrentUser0_HTTP_Handler(srv))
+	r.GET("/api/console/passport/authorize_menu", _Passport_AuthorizeMenu0_HTTP_Handler(srv))
 }
 
 func _Passport_Login0_HTTP_Handler(srv PassportHTTPServer) func(ctx http.Context) error {
@@ -261,7 +265,27 @@ func _Passport_CurrentUser0_HTTP_Handler(srv PassportHTTPServer) func(ctx http.C
 	}
 }
 
+func _Passport_AuthorizeMenu0_HTTP_Handler(srv PassportHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AuthorizeMenuRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPassportAuthorizeMenu)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AuthorizeMenu(ctx, req.(*AuthorizeMenuRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AuthorizeMenuReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type PassportHTTPClient interface {
+	AuthorizeMenu(ctx context.Context, req *AuthorizeMenuRequest, opts ...http.CallOption) (rsp *AuthorizeMenuReply, err error)
 	CurrentUser(ctx context.Context, req *CurrentUserRequest, opts ...http.CallOption) (rsp *CurrentUserReply, err error)
 	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginReply, err error)
 	Logout(ctx context.Context, req *LogoutRequest, opts ...http.CallOption) (rsp *LogoutReply, err error)
@@ -279,6 +303,19 @@ type PassportHTTPClientImpl struct {
 
 func NewPassportHTTPClient(client *http.Client) PassportHTTPClient {
 	return &PassportHTTPClientImpl{client}
+}
+
+func (c *PassportHTTPClientImpl) AuthorizeMenu(ctx context.Context, in *AuthorizeMenuRequest, opts ...http.CallOption) (*AuthorizeMenuReply, error) {
+	var out AuthorizeMenuReply
+	pattern := "/api/console/passport/authorize_menu"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPassportAuthorizeMenu))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *PassportHTTPClientImpl) CurrentUser(ctx context.Context, in *CurrentUserRequest, opts ...http.CallOption) (*CurrentUserReply, error) {

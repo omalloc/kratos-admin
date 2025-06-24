@@ -14,6 +14,136 @@ info:
         url: https://github.com/google/gnostic/blob/master/LICENSE
     version: 1.0.0
 paths:
+    /api/console/menu:
+        get:
+            tags:
+                - Menu
+            operationId: Menu_ListMenu
+            parameters:
+                - name: pagination.page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.page_size
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.total
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.ListMenuReply'
+        post:
+            tags:
+                - Menu
+            operationId: Menu_CreateMenu
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.CreateMenuRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.CreateMenuReply'
+    /api/console/menu/{id}:
+        get:
+            tags:
+                - Menu
+            operationId: Menu_GetMenu
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.GetMenuReply'
+        put:
+            tags:
+                - Menu
+            operationId: Menu_UpdateMenu
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.UpdateMenuRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.UpdateMenuReply'
+        delete:
+            tags:
+                - Menu
+            operationId: Menu_DeleteMenu
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.DeleteMenuReply'
+    /api/console/passport/authorize_menu:
+        get:
+            tags:
+                - Passport
+            description: 获取授权的菜单
+            operationId: Passport_AuthorizeMenu
+            parameters:
+                - name: user_id
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.passport.AuthorizeMenuReply'
     /api/console/passport/current:
         get:
             tags:
@@ -677,6 +807,31 @@ components:
                     type: string
                 role_id:
                     type: string
+        api.console.administration.CreateMenuReply:
+            type: object
+            properties:
+                id:
+                    type: string
+        api.console.administration.CreateMenuRequest:
+            type: object
+            properties:
+                pid:
+                    type: string
+                permission_id:
+                    type: string
+                name:
+                    type: string
+                icon:
+                    type: string
+                path:
+                    type: string
+                sort_by:
+                    type: string
+                hidden:
+                    type: boolean
+                status:
+                    type: integer
+                    format: enum
         api.console.administration.CreatePermissionReply:
             type: object
             properties: {}
@@ -735,6 +890,9 @@ components:
                     type: array
                     items:
                         type: string
+        api.console.administration.DeleteMenuReply:
+            type: object
+            properties: {}
         api.console.administration.DeletePermissionReply:
             type: object
             properties: {}
@@ -751,6 +909,11 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.RoleInfo'
+        api.console.administration.GetMenuReply:
+            type: object
+            properties:
+                data:
+                    $ref: '#/components/schemas/api.console.administration.MenuInfo'
         api.console.administration.GetPermissionReply:
             type: object
             properties:
@@ -811,6 +974,15 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.PermissionInfo'
+        api.console.administration.ListMenuReply:
+            type: object
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.MenuInfo'
+                pagination:
+                    $ref: '#/components/schemas/protobuf.Pagination'
         api.console.administration.ListPermissionReply:
             type: object
             properties:
@@ -838,6 +1010,34 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.UserInfo'
+        api.console.administration.MenuInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                pid:
+                    type: string
+                permission_id:
+                    type: string
+                name:
+                    type: string
+                icon:
+                    type: string
+                path:
+                    type: string
+                sort_by:
+                    type: string
+                hidden:
+                    type: boolean
+                status:
+                    type: integer
+                    format: enum
+                created_at:
+                    type: string
+                    format: date-time
+                updated_at:
+                    type: string
+                    format: date-time
         api.console.administration.PermissionInfo:
             type: object
             properties:
@@ -913,6 +1113,31 @@ components:
         api.console.administration.UnbindRoleReply:
             type: object
             properties: {}
+        api.console.administration.UpdateMenuReply:
+            type: object
+            properties: {}
+        api.console.administration.UpdateMenuRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                pid:
+                    type: string
+                permission_id:
+                    type: string
+                name:
+                    type: string
+                icon:
+                    type: string
+                path:
+                    type: string
+                sort_by:
+                    type: string
+                hidden:
+                    type: boolean
+                status:
+                    type: integer
+                    format: enum
         api.console.administration.UpdatePermissionReply:
             type: object
             properties: {}
@@ -1001,6 +1226,13 @@ components:
                     items:
                         type: integer
                         format: int32
+        api.console.passport.AuthorizeMenuReply:
+            type: object
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.MenuInfo'
         api.console.passport.CurrentUserReply:
             type: object
             properties:
@@ -1126,6 +1358,7 @@ components:
             name: Authorization
             in: header
 tags:
+    - name: Menu
     - name: Passport
     - name: Permission
     - name: Role

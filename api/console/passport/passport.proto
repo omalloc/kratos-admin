@@ -10,6 +10,7 @@ import "errors/errors.proto";
 import "google/api/annotations.proto";
 import "console/administration/user.proto";
 import "console/administration/role.proto";
+import "console/administration/menu.proto";
 
 enum ErrorReason {
   // Set default error code.
@@ -107,6 +108,13 @@ service Passport {
 			get: "/api/console/passport/current",
 		};
 	}
+
+	// 获取授权的菜单
+	rpc AuthorizeMenu (AuthorizeMenuRequest) returns (AuthorizeMenuReply){
+		option (google.api.http) = {
+			get: "/api/console/passport/authorize_menu"
+		};
+	}
 	
 }	
 
@@ -180,4 +188,11 @@ message CurrentUserRequest {}
 message CurrentUserReply {
 	administration.UserInfo user = 1;
 	repeated administration.RoleInfo roles = 2;
+}
+
+message AuthorizeMenuRequest {
+	int64 user_id = 1;
+}
+message AuthorizeMenuReply {
+	repeated administration.MenuInfo data = 1;
 }

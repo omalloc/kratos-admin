@@ -28,6 +28,7 @@ const (
 	Passport_UpdateUsername_FullMethodName    = "/api.console.passport.Passport/UpdateUsername"
 	Passport_UpdateProfile_FullMethodName     = "/api.console.passport.Passport/UpdateProfile"
 	Passport_CurrentUser_FullMethodName       = "/api.console.passport.Passport/CurrentUser"
+	Passport_AuthorizeMenu_FullMethodName     = "/api.console.passport.Passport/AuthorizeMenu"
 )
 
 // PassportClient is the client API for Passport service.
@@ -52,6 +53,8 @@ type PassportClient interface {
 	UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UpdateProfileReply, error)
 	// 获取当前用户信息
 	CurrentUser(ctx context.Context, in *CurrentUserRequest, opts ...grpc.CallOption) (*CurrentUserReply, error)
+	// 获取授权的菜单
+	AuthorizeMenu(ctx context.Context, in *AuthorizeMenuRequest, opts ...grpc.CallOption) (*AuthorizeMenuReply, error)
 }
 
 type passportClient struct {
@@ -152,6 +155,16 @@ func (c *passportClient) CurrentUser(ctx context.Context, in *CurrentUserRequest
 	return out, nil
 }
 
+func (c *passportClient) AuthorizeMenu(ctx context.Context, in *AuthorizeMenuRequest, opts ...grpc.CallOption) (*AuthorizeMenuReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuthorizeMenuReply)
+	err := c.cc.Invoke(ctx, Passport_AuthorizeMenu_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PassportServer is the server API for Passport service.
 // All implementations must embed UnimplementedPassportServer
 // for forward compatibility.
@@ -174,6 +187,8 @@ type PassportServer interface {
 	UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileReply, error)
 	// 获取当前用户信息
 	CurrentUser(context.Context, *CurrentUserRequest) (*CurrentUserReply, error)
+	// 获取授权的菜单
+	AuthorizeMenu(context.Context, *AuthorizeMenuRequest) (*AuthorizeMenuReply, error)
 	mustEmbedUnimplementedPassportServer()
 }
 
@@ -210,6 +225,9 @@ func (UnimplementedPassportServer) UpdateProfile(context.Context, *UpdateProfile
 }
 func (UnimplementedPassportServer) CurrentUser(context.Context, *CurrentUserRequest) (*CurrentUserReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CurrentUser not implemented")
+}
+func (UnimplementedPassportServer) AuthorizeMenu(context.Context, *AuthorizeMenuRequest) (*AuthorizeMenuReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AuthorizeMenu not implemented")
 }
 func (UnimplementedPassportServer) mustEmbedUnimplementedPassportServer() {}
 func (UnimplementedPassportServer) testEmbeddedByValue()                  {}
@@ -394,6 +412,24 @@ func _Passport_CurrentUser_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Passport_AuthorizeMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthorizeMenuRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PassportServer).AuthorizeMenu(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Passport_AuthorizeMenu_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PassportServer).AuthorizeMenu(ctx, req.(*AuthorizeMenuRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Passport_ServiceDesc is the grpc.ServiceDesc for Passport service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -436,6 +472,10 @@ var Passport_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CurrentUser",
 			Handler:    _Passport_CurrentUser_Handler,
+		},
+		{
+			MethodName: "AuthorizeMenu",
+			Handler:    _Passport_AuthorizeMenu_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

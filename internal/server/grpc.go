@@ -26,6 +26,7 @@ func NewGRPCServer(c *conf.Server, passportc *conf.Passport, logger log.Logger,
 	role *service.RoleService,
 	permission *service.PermissionService,
 	passport *service.PassportService,
+	menu *service.MenuService,
 ) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
@@ -58,6 +59,7 @@ func NewGRPCServer(c *conf.Server, passportc *conf.Passport, logger log.Logger,
 	adminpb.RegisterUserServer(srv, user)
 	adminpb.RegisterRoleServer(srv, role)
 	adminpb.RegisterPermissionServer(srv, permission)
+	adminpb.RegisterMenuServer(srv, menu)
 	passportpb.RegisterPassportServer(srv, passport)
 	return srv
 }

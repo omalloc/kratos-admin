@@ -25,6 +25,7 @@ var ProviderSet = wire.NewSet(
 	NewUserRepo,
 	NewRoleRepo,
 	NewPermissionRepo,
+	NewMenuRepo,
 )
 
 var (
@@ -77,6 +78,7 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 			&biz.Permission{},
 			&biz.RolePermission{},
 			&biz.UserRole{},
+			&biz.Menu{},
 		)
 
 	cleanup := func() {

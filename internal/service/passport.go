@@ -28,15 +28,21 @@ type PassportService struct {
 	pb.UnimplementedPassportServer
 
 	userUsecase               *biz.UserUsecase
+	menuUsecase               *biz.MenuUsecase
 	tokener                   tokener.AppToken
 	etcdClient                *clientv3.Client
 	applicationEventPublisher *event.ApplicationEventPublisher
 }
 
-func NewPassportService(c *conf.Bootstrap, applicationEventPublisher *event.ApplicationEventPublisher, userUsecase *biz.UserUsecase, etcdClient *clientv3.Client) *PassportService {
+func NewPassportService(c *conf.Bootstrap, applicationEventPublisher *event.ApplicationEventPublisher,
+	userUsecase *biz.UserUsecase,
+	menuUsecase *biz.MenuUsecase,
+	etcdClient *clientv3.Client,
+) *PassportService {
 	return &PassportService{
 		applicationEventPublisher: applicationEventPublisher,
 		userUsecase:               userUsecase,
+		menuUsecase:               menuUsecase,
 		tokener: tokener.NewTokener(
 			tokener.WithTTL(time.Hour),
 			tokener.WithSecret(c.Passport.Secret),
@@ -214,6 +220,49 @@ func (s *PassportService) CurrentUser(ctx context.Context, req *pb.CurrentUserRe
 				}),
 			}
 		}),
+	}, nil
+}
+
+// 获取授权的菜单
+func (s *PassportService) AuthorizeMenu(ctx context.Context, req *pb.AuthorizeMenuRequest) (*pb.AuthorizeMenuReply, error) {
+	claims, _ := jwt.FromContext(ctx)
+
+	user, err := s.userUsecase.GetUser(ctx, claims.UID)
+	if err != nil {
+		return nil, err
+	}
+
+	permissionMap := make(map[int64]*biz.RolePermission)
+	for _, role := range user.Roles {
+		for _, permission := range role.Permissions {
+			if last, exist := permissionMap[permission.ID]; exist {
+				// 合并权限
+				last.Actions = lo.Uniq(append(last.Actions, permission.Actions...))
+				last.DataAccess = lo.Uniq(append(last.DataAccess, permission.DataAccess...))
+				continue
+			}
+			permissionMap[permission.ID] = permission
+		}
+	}
+
+	menus, err := s.menuUsecase.SelectAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	userMenus := lo.Filter(menus, func(item *biz.Menu, _ int) bool {
+		if item.PermissionID == 0 {
+			return true
+		}
+
+		if _, exist := permissionMap[item.PermissionID]; exist {
+			return true
+		}
+		return false
+	})
+
+	return &pb.AuthorizeMenuReply{
+		Data: lo.Map(userMenus, toMenuProto),
 	}, nil
 }
 
