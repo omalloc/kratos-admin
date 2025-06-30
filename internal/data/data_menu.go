@@ -69,7 +69,7 @@ func (r *menuRepo) SelectList(ctx context.Context, pagination *protobuf.Paginati
 		query = query.Where("name LIKE ?", "%"+name+"%")
 	}
 
-	if status >= 0 {
+	if status > 0 {
 		query = query.Where("status = ?", status)
 	}
 

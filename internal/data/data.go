@@ -81,6 +81,12 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 			&biz.Menu{},
 		)
 
+	// 初始化基础数据
+	if err := SeedData(db, logger); err != nil {
+		log.Errorf("初始化基础数据失败: %v", err)
+		return nil, emptyCallback, err
+	}
+
 	cleanup := func() {
 		log.Info("closing the data resources")
 	}

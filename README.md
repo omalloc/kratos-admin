@@ -85,4 +85,6 @@ $ export NEW_MODULE_NAME=example.com/you-are-project
 $ export OLD_MODULE_NAME=github.com/omalloc/kratos-admin
 $ go mod edit -module ${NEW_MODULE_NAME}
 $ find . -type f -name '*.go' -exec sed -i -e 's,{OLD_MODULE_NAME},{NEW_MODULE_NAME},g' {};
+
+go run cmd/kratos-admin/main.go cmd/kratos-admin/cobra.go cmd/kratos-admin/wire_gen.go --conf ./configs
 ```
