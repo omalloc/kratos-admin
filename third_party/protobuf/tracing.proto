@@ -1,0 +1,8 @@
+syntax = "proto3";
+package protobuf;
+
+option go_package = "github.com/omalloc/contrib/protobuf;protobuf";
+
+message Tracing {
+  string endpoint = 1;
+} 

@@ -1,0 +1,11 @@
+syntax = "proto3";
+package protobuf;
+
+option go_package = "github.com/omalloc/contrib/protobuf;protobuf";
+
+message Registry {
+  bool enabled = 1;
+  bool only_discovery = 2;
+  string namespace = 3;
+  repeated string endpoints = 4;
+} 
