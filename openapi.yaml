@@ -1086,6 +1086,9 @@ components:
                 perm_id:
                     type: string
                     description: 权限id
+                name:
+                    type: string
+                    description: 权限名称
                 actions:
                     type: array
                     items:

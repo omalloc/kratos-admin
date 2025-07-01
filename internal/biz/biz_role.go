@@ -33,6 +33,8 @@ type RolePermission struct {
 	Actions    []*Action `json:"actions" gorm:"column:actions;type:json;serializer:json;comment:操作"`
 	DataAccess []*Action `json:"data_access,omitempty" gorm:"column:data_access;type:json;serializer:json;comment:数据权限"`
 	CreatedAt  time.Time `json:"created_at" gorm:"column:created_at;type:datetime;comment:创建时间"`
+	Name       string    `json:"name" gorm:"column:name;->"`
+	Alias      string    `json:"alias" gorm:"column:alias;->"`
 }
 
 func (RolePermission) TableName() string {

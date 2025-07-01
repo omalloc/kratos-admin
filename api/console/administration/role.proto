@@ -63,12 +63,14 @@ message RolePermission {
 	int64 role_id = 2;
 	// 权限id
 	int64 perm_id = 3;
+	// 权限名称
+	string name = 4;
 	// 操作权限
-	repeated Action actions = 4;
+	repeated Action actions = 5;
 	// 数据权限
-	repeated Action data_access = 5;
+	repeated Action data_access = 6;
 	// 绑定权限时间
-	google.protobuf.Timestamp created_at = 6;
+	google.protobuf.Timestamp created_at = 7;
 }
 
 message RoleInfo {

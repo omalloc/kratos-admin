@@ -214,6 +214,7 @@ func (s *PassportService) CurrentUser(ctx context.Context, req *pb.CurrentUserRe
 						Id:         item.ID,
 						RoleId:     item.RoleID,
 						PermId:     item.PermID,
+						Name:       item.Name,
 						Actions:    lo.Map(item.Actions, fromAction),
 						DataAccess: lo.Map(item.DataAccess, fromAction),
 					}

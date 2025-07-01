@@ -7,6 +7,7 @@ import (
 	"github.com/omalloc/contrib/kratos/orm"
 	"github.com/omalloc/contrib/kratos/orm/crud"
 	"github.com/omalloc/contrib/protobuf"
+	"github.com/samber/lo"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -93,13 +94,36 @@ func (r *roleRepo) SelectByUserID(ctx context.Context, userID int64) ([]*biz.Rol
 }
 
 func (r *roleRepo) SelectRolePermission(ctx context.Context, roleIDs []int64) ([]*biz.RoleJoinPermission, error) {
-	var ret []*biz.RoleJoinPermission
+	var (
+		roles           []*biz.Role
+		rolePermissions []*biz.RolePermission
+	)
 
-	err := r.txm.WithContext(ctx).Model(&biz.RoleJoinPermission{}).
+	// query roles
+
+	txm := r.txm.WithContext(ctx)
+	err := txm.Model(&biz.Role{}).
 		Where("roles.id IN (?)", roleIDs).
-		Preload(clause.Associations).
-		Find(&ret).Error
+		Find(&roles).Error
+	if err != nil {
+		return nil, err
+	}
 
+	// query role_permissions
+	err = txm.Model(&biz.RolePermission{}).
+		Select("roles_bind_permission.*, permissions.name, permissions.alias").
+		Joins("LEFT JOIN permissions ON roles_bind_permission.perm_id = permissions.id").
+		Where("roles_bind_permission.role_id IN (?)", roleIDs).
+		Find(&rolePermissions).Error
+
+	ret := lo.Map(roles, func(role *biz.Role, _ int) *biz.RoleJoinPermission {
+		return &biz.RoleJoinPermission{
+			Role: *role,
+			Permissions: lo.Filter(rolePermissions, func(item *biz.RolePermission, _ int) bool {
+				return item.RoleID == role.ID
+			}),
+		}
+	})
 	return ret, err
 }
 
