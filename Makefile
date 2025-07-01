@@ -1,9 +1,26 @@
+# vim:noet
+
 GOHOSTOS:=$(shell go env GOHOSTOS)
 GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always --abbrev=8 | sed 's/[^a-zA-Z0-9\.]/-/g')
 GITHASH=$(shell git rev-parse HEAD)
 APPNAME=$(shell go mod edit -print | head -n 1 | awk -F/ '{print $$3}')
 Built:=$(shell date +%s)
+
+ifeq ($(shell uname),Linux)
+	OS=linux
+else
+	OS=darwin
+endif
+
+ifeq ($(shell uname -m),aarch64)
+    ARCH=arm64
+else ifeq ($(shell uname -m),arm64)
+    ARCH=arm64
+else
+    ARCH=amd64
+endif
+
 
 ifeq ($(GOHOSTOS), windows)
   #the `find.exe` is different from `find` in bash/shell.
@@ -23,7 +40,6 @@ endif
 .PHONY: init
 # init env
 init:
-	go install github.com/mitchellh/gox@latest
 	go install github.com/swaggo/swag/cmd/swag@latest
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
@@ -34,6 +50,8 @@ init:
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
 	go install github.com/google/wire/cmd/wire@latest
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
+	go install mvdan.cc/gofumpt@latest
 
 .PHONY: config
 # generate internal proto
@@ -85,13 +103,14 @@ run:
 		./cmd/... --conf ./configs/
 
 .PHONY: build
-# build
+# build cross compile
 build:
-	mkdir -p bin/ && gox -osarch="linux/amd64" -ldflags="-w -extldflags=-static \
+	mkdir -p bin/ && GOOS=$(OS) GOARCH=$(ARCH) go build -o bin/ \
+		-ldflags="-w -extldflags=-static \
 		-X main.Version=$(VERSION) \
 		-X main.GitHash=$(GITHASH) \
 		-X main.Name=$(APPNAME) \
-		-X main.Built=$(Built)" -output=bin/server ./...
+		-X main.Built=$(Built)" ./cmd/...
 
 .PHONY: zip
 # zip bin file

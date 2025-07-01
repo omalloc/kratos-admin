@@ -38,3 +38,5 @@ bin/
 .idea/
 *.swp
 __debug_bin**
+configs/local*.yaml
+configs/config.dev.yaml

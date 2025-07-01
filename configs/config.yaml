@@ -7,11 +7,22 @@ server:
     timeout: 1s
 data:
   database:
-    driver: mysql
-    source: root:abc@123..@tcp(127.0.0.1:3306)/kratos_cp?charset=utf8mb4&parseTime=true&loc=Local
+    # driver: mysql
+    # source: root:password@tcp(127.0.0.1:3306)/your_database_name?charset=utf8mb4&parseTime=true&loc=Local
+    driver: sqlite
+    source: ./bin/kratos.db?cache=shared&mode=rwc&_journal_mode=WAL&_pragma=journal_mode(WAL)&charset=utf8mb4&parseTime=true&loc=Local
   redis:
     addr: 127.0.0.1:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
 passport:
-  secret: abc
+  secret: secret-key-for-passport
+
+registry:
+  enabled: true
+  only_discovery: false
+  namespace: /bedrock
+  endpoints:
+    - 127.0.0.1:2379
+tracing:
+  endpoint: http://127.0.0.1:14268/api/traces
