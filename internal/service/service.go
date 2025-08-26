@@ -11,4 +11,6 @@ var ProviderSet = wire.NewSet(
 	NewPermissionService,
 	NewPassportService,
 	NewMenuService,
+	// others
+	NewCrontabService,
 )

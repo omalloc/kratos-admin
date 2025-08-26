@@ -113,10 +113,12 @@ func main() {
 		panic(err)
 	}
 
-	trace.InitTracer(
-		trace.WithServiceName(Name), // service-name registered in jaeger-service
-		trace.WithEndpoint(bc.Tracing.GetEndpoint()),
-	)
+	if bc.Tracing.GetEndpoint() != "" {
+		trace.InitTracer(
+			trace.WithServiceName(Name), // service-name registered in jaeger-service
+			trace.WithEndpoint(bc.Tracing.GetEndpoint()),
+		)
+	}
 
 	app, cleanup, err := wireApp(&bc, bc.Server, bc.Data, bc.Passport, logger)
 	if err != nil {

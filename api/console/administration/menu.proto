@@ -19,18 +19,18 @@ service Menu {
 	}
 	rpc UpdateMenu (UpdateMenuRequest) returns (UpdateMenuReply){
 		option (google.api.http) = {
-			put: "/api/console/menu/{id}"
+			put: "/api/console/menu/{uid}"
 			body: "*"
 		};
 	}
 	rpc DeleteMenu (DeleteMenuRequest) returns (DeleteMenuReply){
 		option (google.api.http) = {
-			delete: "/api/console/menu/{id}"
+			delete: "/api/console/menu/{uid}"
 		};
 	}
 	rpc GetMenu (GetMenuRequest) returns (GetMenuReply){
 		option (google.api.http) = {
-			get: "/api/console/menu/{id}"
+			get: "/api/console/menu/{uid}"
 		};
 	}
 	rpc ListMenu (ListMenuRequest) returns (ListMenuReply){
@@ -46,7 +46,7 @@ enum MenuStatus {
 }
 
 message MenuInfo {
-	int64 id = 1;
+	int64 uid = 1;
 	int64 pid = 2;
 	int64 permission_id = 3;
 	string name = 4;
@@ -71,11 +71,11 @@ message CreateMenuRequest {
 }
 
 message CreateMenuReply {
-	int64 id = 1;
+	int64 uid = 1;
 }
 
 message UpdateMenuRequest {
-	int64 id = 1;
+	int64 uid = 1;
 	int64 pid = 2;
 	int64 permission_id = 3;
 	string name = 4;
@@ -89,13 +89,13 @@ message UpdateMenuRequest {
 message UpdateMenuReply {}
 
 message DeleteMenuRequest {
-	int64 id = 1;
+	int64 uid = 1;
 }
 
 message DeleteMenuReply {}
 
 message GetMenuRequest {
-	int64 id = 1;
+	int64 uid = 1;
 }
 
 message GetMenuReply {

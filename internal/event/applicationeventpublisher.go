@@ -31,8 +31,8 @@ func (pub *ApplicationEventPublisher) Stop(context.Context) error {
 	return pub.publisher.Close()
 }
 
-func (pub *ApplicationEventPublisher) Publish(ctx context.Context, topic string, payload *message.Message) error {
-	return pub.publisher.Publish(topic, payload)
+func (pub *ApplicationEventPublisher) Publish(ctx context.Context, topic string, payload *message.Message) {
+	_ = pub.publisher.Publish(topic, payload)
 }
 
 func (pub *ApplicationEventPublisher) Subscribe(ctx context.Context, topic string) (<-chan *message.Message, error) {

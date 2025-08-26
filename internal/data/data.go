@@ -8,10 +8,10 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 	"github.com/omalloc/contrib/kratos/orm"
+	"github.com/omalloc/kratos-admin/internal/biz"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"github.com/omalloc/kratos-admin/internal/biz"
 	"github.com/omalloc/kratos-admin/internal/conf"
 )
 
@@ -26,11 +26,10 @@ var ProviderSet = wire.NewSet(
 	NewRoleRepo,
 	NewPermissionRepo,
 	NewMenuRepo,
+	NewCrontabRepo,
 )
 
-var (
-	emptyCallback = func() {}
-)
+var emptyCallback = func() {}
 
 type DriverDialector func(dsn string) gorm.Dialector
 
@@ -59,30 +58,32 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 		orm.WithDriver(driver(c.Database.Source)),
 		orm.WithTracingOpts(orm.WithDatabaseName("kratos_cp")),
 		orm.WithLogger(
-			// orm.WithDebug(),
+			orm.WithDebug(),
 			orm.WIthSlowThreshold(time.Second*2),
 			orm.WithSkipCallerLookup(false),
 			orm.WithSkipErrRecordNotFound(true),
 			orm.WithLogHelper(logger),
 		),
 	)
-
 	if err != nil {
 		return nil, emptyCallback, err
 	}
 
-	_ = db.Session(&gorm.Session{SkipHooks: true}).
-		AutoMigrate(
-			&biz.User{},
-			&biz.Role{},
-			&biz.Permission{},
-			&biz.RolePermission{},
-			&biz.UserRole{},
-			&biz.Menu{},
-		)
+	if c.Database.Migrate {
+		_ = db.Session(&gorm.Session{SkipHooks: true}).
+			AutoMigrate(
+				&biz.User{},
+				&biz.Role{},
+				&biz.Permission{},
+				&biz.RolePermission{},
+				&biz.UserRole{},
+				&biz.Menu{},
+				&biz.Crontab{},
+			)
+	}
 
 	// 初始化基础数据
-	if err := SeedData(db, logger); err != nil {
+	if err := SeedData(db); err != nil {
 		log.Errorf("初始化基础数据失败: %v", err)
 		return nil, emptyCallback, err
 	}

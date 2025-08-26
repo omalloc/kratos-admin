@@ -27,8 +27,9 @@ func NewGRPCServer(c *conf.Server, passportc *conf.Passport, logger log.Logger,
 	permission *service.PermissionService,
 	passport *service.PassportService,
 	menu *service.MenuService,
+	crontab *service.CrontabService,
 ) *grpc.Server {
-	var opts = []grpc.ServerOption{
+	opts := []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
 			metadata.Server(),
@@ -60,6 +61,7 @@ func NewGRPCServer(c *conf.Server, passportc *conf.Passport, logger log.Logger,
 	adminpb.RegisterRoleServer(srv, role)
 	adminpb.RegisterPermissionServer(srv, permission)
 	adminpb.RegisterMenuServer(srv, menu)
+	adminpb.RegisterCrontabServer(srv, crontab)
 	passportpb.RegisterPassportServer(srv, passport)
 	return srv
 }

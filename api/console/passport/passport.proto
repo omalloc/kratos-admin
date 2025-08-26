@@ -188,6 +188,7 @@ message CurrentUserRequest {}
 message CurrentUserReply {
 	administration.UserInfo user = 1;
 	repeated administration.RoleInfo roles = 2;
+  repeated administration.MenuInfo allow_menus = 3;
 }
 
 message AuthorizeMenuRequest {

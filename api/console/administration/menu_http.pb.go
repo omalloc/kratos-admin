@@ -36,9 +36,9 @@ type MenuHTTPServer interface {
 func RegisterMenuHTTPServer(s *http.Server, srv MenuHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/console/menu", _Menu_CreateMenu0_HTTP_Handler(srv))
-	r.PUT("/api/console/menu/{id}", _Menu_UpdateMenu0_HTTP_Handler(srv))
-	r.DELETE("/api/console/menu/{id}", _Menu_DeleteMenu0_HTTP_Handler(srv))
-	r.GET("/api/console/menu/{id}", _Menu_GetMenu0_HTTP_Handler(srv))
+	r.PUT("/api/console/menu/{uid}", _Menu_UpdateMenu0_HTTP_Handler(srv))
+	r.DELETE("/api/console/menu/{uid}", _Menu_DeleteMenu0_HTTP_Handler(srv))
+	r.GET("/api/console/menu/{uid}", _Menu_GetMenu0_HTTP_Handler(srv))
 	r.GET("/api/console/menu", _Menu_ListMenu0_HTTP_Handler(srv))
 }
 
@@ -183,7 +183,7 @@ func (c *MenuHTTPClientImpl) CreateMenu(ctx context.Context, in *CreateMenuReque
 
 func (c *MenuHTTPClientImpl) DeleteMenu(ctx context.Context, in *DeleteMenuRequest, opts ...http.CallOption) (*DeleteMenuReply, error) {
 	var out DeleteMenuReply
-	pattern := "/api/console/menu/{id}"
+	pattern := "/api/console/menu/{uid}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMenuDeleteMenu))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -196,7 +196,7 @@ func (c *MenuHTTPClientImpl) DeleteMenu(ctx context.Context, in *DeleteMenuReque
 
 func (c *MenuHTTPClientImpl) GetMenu(ctx context.Context, in *GetMenuRequest, opts ...http.CallOption) (*GetMenuReply, error) {
 	var out GetMenuReply
-	pattern := "/api/console/menu/{id}"
+	pattern := "/api/console/menu/{uid}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMenuGetMenu))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -222,7 +222,7 @@ func (c *MenuHTTPClientImpl) ListMenu(ctx context.Context, in *ListMenuRequest, 
 
 func (c *MenuHTTPClientImpl) UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...http.CallOption) (*UpdateMenuReply, error) {
 	var out UpdateMenuReply
-	pattern := "/api/console/menu/{id}"
+	pattern := "/api/console/menu/{uid}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationMenuUpdateMenu))
 	opts = append(opts, http.PathTemplate(pattern))

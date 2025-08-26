@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/omalloc/contrib/protobuf"
+	"github.com/omalloc/kratos-admin/pkg/idgen"
 	"github.com/samber/lo"
 
 	pb "github.com/omalloc/kratos-admin/api/console/administration"
@@ -22,6 +23,7 @@ func NewPermissionService(usecase *biz.PermissionUsecase) *PermissionService {
 
 func (s *PermissionService) CreatePermission(ctx context.Context, req *pb.CreatePermissionRequest) (*pb.CreatePermissionReply, error) {
 	if err := s.usecase.CreatePermission(ctx, &biz.Permission{
+		UID:      idgen.NextId(),
 		Name:     req.Name,
 		Alias:    req.Alias,
 		Describe: req.Describe,
@@ -35,7 +37,7 @@ func (s *PermissionService) CreatePermission(ctx context.Context, req *pb.Create
 }
 func (s *PermissionService) UpdatePermission(ctx context.Context, req *pb.UpdatePermissionRequest) (*pb.UpdatePermissionReply, error) {
 	if err := s.usecase.UpdatePermission(ctx, &biz.Permission{
-		ID:       req.Id,
+		UID:      req.Uid,
 		Name:     req.Name,
 		Alias:    req.Alias,
 		Describe: req.Describe,
@@ -48,16 +50,20 @@ func (s *PermissionService) UpdatePermission(ctx context.Context, req *pb.Update
 }
 
 func (s *PermissionService) DeletePermission(ctx context.Context, req *pb.DeletePermissionRequest) (*pb.DeletePermissionReply, error) {
+	if err := s.usecase.DeletePermission(ctx, req.Uid); err != nil {
+		return nil, err
+	}
 	return &pb.DeletePermissionReply{}, nil
 }
+
 func (s *PermissionService) GetPermission(ctx context.Context, req *pb.GetPermissionRequest) (*pb.GetPermissionReply, error) {
-	permission, err := s.usecase.GetPermission(ctx, req.Id)
+	permission, err := s.usecase.GetPermission(ctx, req.Uid)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.GetPermissionReply{
-		Id:       permission.ID,
+		Uid:      permission.UID,
 		Name:     permission.Name,
 		Alias:    permission.Alias,
 		Describe: permission.Describe,
@@ -91,12 +97,13 @@ func (s *PermissionService) ListAllPermission(ctx context.Context, req *pb.ListA
 
 func (s *PermissionService) toMap(permission *biz.Permission, _ int) *pb.PermissionInfo {
 	return &pb.PermissionInfo{
-		Id:       permission.ID,
-		Name:     permission.Name,
-		Alias:    permission.Alias,
-		Describe: permission.Describe,
-		Actions:  lo.Map(permission.Actions, fromAction),
-		Status:   pb.PermissionStatus(permission.Status),
+		Uid:         permission.UID,
+		Name:        permission.Name,
+		Alias:       permission.Alias,
+		Describe:    permission.Describe,
+		AllowDelete: len(permission.Tags) <= 0, // 没有 tag 才可以删除
+		Actions:     lo.Map(permission.Actions, fromAction),
+		Status:      pb.PermissionStatus(permission.Status),
 	}
 }
 

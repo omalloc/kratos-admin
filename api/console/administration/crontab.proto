@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package api.console.administration;
+
+option go_package = "github.com/omalloc/kratos-admin/api/console/administration;administration";
+option java_multiple_files = true;
+option java_package = "api.console.administration";
+
+import "google/api/annotations.proto";
+import "protobuf/pagination.proto";
+import "google/protobuf/timestamp.proto";
+
+service Crontab {
+	rpc CreateCrontab (CreateCrontabRequest) returns (CreateCrontabReply){
+		option (google.api.http) = {
+			post: "/api/console/crontab"
+			body: "*"
+		};
+	};
+	rpc UpdateCrontab (UpdateCrontabRequest) returns (UpdateCrontabReply){
+		option (google.api.http) = {
+			put: "/api/console/crontab/{uid}"
+			body: "*"
+		};
+	};
+	rpc DeleteCrontab (DeleteCrontabRequest) returns (DeleteCrontabReply){
+		option (google.api.http) = {
+			delete: "/api/console/crontab/{uid}"
+		};
+	};
+	rpc GetCrontab (GetCrontabRequest) returns (GetCrontabReply){
+		option (google.api.http) = {
+			get: "/api/console/crontab/{uid}"
+		};
+	};
+	rpc ListCrontab (ListCrontabRequest) returns (ListCrontabReply){
+		option (google.api.http) = {
+			get: "/api/console/crontab"
+		};
+	};
+}
+
+message CrontabInfo {
+	int64 uid = 1;
+	// 任务名称
+	string name = 2;
+	// 任务表达式
+	string expr = 3;
+	// 任务动作
+	string action = 4;
+	// 任务描述
+	string describe = 5;
+	// 上次执行时间
+	google.protobuf.Timestamp last_run_at = 6;
+	google.protobuf.Timestamp created_at = 7;
+	google.protobuf.Timestamp updated_at = 8;
+}
+
+message CreateCrontabRequest {
+	// 任务名称
+	string name = 2;
+	// 任务表达式
+	string expr = 3;
+	// 任务动作
+	string action = 4;
+	// 任务描述
+	string describe = 5;
+}
+message CreateCrontabReply {}
+
+message UpdateCrontabRequest {
+	int64 uid = 1;
+	// 任务名称
+	string name = 2;
+	// 任务表达式
+	string expr = 3;
+	// 任务动作
+	string action = 4;
+	// 任务描述
+	string describe = 5;
+}
+message UpdateCrontabReply {}
+
+message DeleteCrontabRequest {
+	int64 uid = 1;
+}
+message DeleteCrontabReply {}
+
+message GetCrontabRequest {
+	int64 uid = 1;
+}
+message GetCrontabReply {
+	CrontabInfo data = 1;
+}
+
+message EnableCrontabRequest {
+	int64 uid = 1;
+}
+message EnableCrontabReply {}
+
+message DisableCrontabRequest {
+	int64 uid = 1;
+}
+message DisableCrontabReply {}
+
+message ListCrontabRequest {
+	protobuf.Pagination pagination = 1;
+}
+message ListCrontabReply {
+	protobuf.Pagination pagination = 1;
+	repeated CrontabInfo data = 2;
+}
+

@@ -38,9 +38,9 @@ type PermissionHTTPServer interface {
 func RegisterPermissionHTTPServer(s *http.Server, srv PermissionHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/console/permission", _Permission_CreatePermission0_HTTP_Handler(srv))
-	r.PUT("/api/console/permission/{id}", _Permission_UpdatePermission0_HTTP_Handler(srv))
-	r.DELETE("/api/console/permission/{id}", _Permission_DeletePermission0_HTTP_Handler(srv))
-	r.GET("/api/console/permission/{id}", _Permission_GetPermission0_HTTP_Handler(srv))
+	r.PUT("/api/console/permission/{uid}", _Permission_UpdatePermission0_HTTP_Handler(srv))
+	r.DELETE("/api/console/permission/{uid}", _Permission_DeletePermission0_HTTP_Handler(srv))
+	r.GET("/api/console/permission/{uid}", _Permission_GetPermission0_HTTP_Handler(srv))
 	r.GET("/api/console/permission", _Permission_ListPermission0_HTTP_Handler(srv))
 	r.GET("/api/console/permission-scoped", _Permission_ListAllPermission0_HTTP_Handler(srv))
 }
@@ -206,7 +206,7 @@ func (c *PermissionHTTPClientImpl) CreatePermission(ctx context.Context, in *Cre
 
 func (c *PermissionHTTPClientImpl) DeletePermission(ctx context.Context, in *DeletePermissionRequest, opts ...http.CallOption) (*DeletePermissionReply, error) {
 	var out DeletePermissionReply
-	pattern := "/api/console/permission/{id}"
+	pattern := "/api/console/permission/{uid}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPermissionDeletePermission))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -219,7 +219,7 @@ func (c *PermissionHTTPClientImpl) DeletePermission(ctx context.Context, in *Del
 
 func (c *PermissionHTTPClientImpl) GetPermission(ctx context.Context, in *GetPermissionRequest, opts ...http.CallOption) (*GetPermissionReply, error) {
 	var out GetPermissionReply
-	pattern := "/api/console/permission/{id}"
+	pattern := "/api/console/permission/{uid}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPermissionGetPermission))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -258,7 +258,7 @@ func (c *PermissionHTTPClientImpl) ListPermission(ctx context.Context, in *ListP
 
 func (c *PermissionHTTPClientImpl) UpdatePermission(ctx context.Context, in *UpdatePermissionRequest, opts ...http.CallOption) (*UpdatePermissionReply, error) {
 	var out UpdatePermissionReply
-	pattern := "/api/console/permission/{id}"
+	pattern := "/api/console/permission/{uid}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPermissionUpdatePermission))
 	opts = append(opts, http.PathTemplate(pattern))

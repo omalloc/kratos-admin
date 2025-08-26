@@ -14,6 +14,109 @@ info:
         url: https://github.com/google/gnostic/blob/master/LICENSE
     version: 1.0.0
 paths:
+    /api/console/crontab:
+        get:
+            tags:
+                - Crontab
+            operationId: Crontab_ListCrontab
+            parameters:
+                - name: pagination.page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.page_size
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pagination.total
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.ListCrontabReply'
+        post:
+            tags:
+                - Crontab
+            operationId: Crontab_CreateCrontab
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.CreateCrontabRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.CreateCrontabReply'
+    /api/console/crontab/{uid}:
+        get:
+            tags:
+                - Crontab
+            operationId: Crontab_GetCrontab
+            parameters:
+                - name: uid
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.GetCrontabReply'
+        put:
+            tags:
+                - Crontab
+            operationId: Crontab_UpdateCrontab
+            parameters:
+                - name: uid
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.console.administration.UpdateCrontabRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.UpdateCrontabReply'
+        delete:
+            tags:
+                - Crontab
+            operationId: Crontab_DeleteCrontab
+            parameters:
+                - name: uid
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.console.administration.DeleteCrontabReply'
     /api/console/menu:
         get:
             tags:
@@ -68,13 +171,13 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.CreateMenuReply'
-    /api/console/menu/{id}:
+    /api/console/menu/{uid}:
         get:
             tags:
                 - Menu
             operationId: Menu_GetMenu
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -91,7 +194,7 @@ paths:
                 - Menu
             operationId: Menu_UpdateMenu
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -114,7 +217,7 @@ paths:
                 - Menu
             operationId: Menu_DeleteMenu
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -385,13 +488,13 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.ListAllPermissionReply'
-    /api/console/permission/{id}:
+    /api/console/permission/{uid}:
         get:
             tags:
                 - Permission
             operationId: Permission_GetPermission
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -408,7 +511,7 @@ paths:
                 - Permission
             operationId: Permission_UpdatePermission
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -431,7 +534,7 @@ paths:
                 - Permission
             operationId: Permission_DeletePermission
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -500,13 +603,13 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.GetAllReply'
-    /api/console/role/{id}:
+    /api/console/role/{uid}:
         get:
             tags:
                 - Role
             operationId: Role_GetRole
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -523,7 +626,7 @@ paths:
                 - Role
             operationId: Role_UpdateRole
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -546,7 +649,7 @@ paths:
                 - Role
             operationId: Role_DeleteRole
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -558,13 +661,13 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.DeleteRoleReply'
-    /api/console/role/{id}/permission:
+    /api/console/role/{uid}/permission:
         put:
             tags:
                 - Role
             operationId: Role_BindPermission
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -582,13 +685,13 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.BindPermissionReply'
-    /api/console/role/{id}/permission/{permission_id}:
+    /api/console/role/{uid}/permission/{permission_id}:
         put:
             tags:
                 - Role
             operationId: Role_UnbindPermission
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -632,6 +735,19 @@ paths:
                   schema:
                     type: integer
                     format: int32
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+                - name: username
+                  in: query
+                  schema:
+                    type: string
+                - name: email
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -656,13 +772,13 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.CreateUserReply'
-    /api/console/user/{id}:
+    /api/console/user/{uid}:
         get:
             tags:
                 - User
             operationId: User_GetUser
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -679,7 +795,7 @@ paths:
                 - User
             operationId: User_UpdateUser
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -702,7 +818,7 @@ paths:
                 - User
             operationId: User_DeleteUser
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -714,13 +830,13 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.DeleteUserReply'
-    /api/console/user/{id}/role:
+    /api/console/user/{uid}/role:
         post:
             tags:
                 - User
             operationId: User_BindRole
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -738,13 +854,13 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.console.administration.BindRoleReply'
-    /api/console/user/{id}/role/{role_id}:
+    /api/console/user/{uid}/role/{role_id}:
         delete:
             tags:
                 - User
             operationId: User_UnbindRole
             parameters:
-                - name: id
+                - name: uid
                   in: path
                   required: true
                   schema:
@@ -778,7 +894,7 @@ components:
         api.console.administration.BindPermissionRequest:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 data:
                     type: array
@@ -803,14 +919,32 @@ components:
         api.console.administration.BindRoleRequest:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 role_id:
                     type: string
+        api.console.administration.CreateCrontabReply:
+            type: object
+            properties: {}
+        api.console.administration.CreateCrontabRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: 任务名称
+                expr:
+                    type: string
+                    description: 任务表达式
+                action:
+                    type: string
+                    description: 任务动作
+                describe:
+                    type: string
+                    description: 任务描述
         api.console.administration.CreateMenuReply:
             type: object
             properties:
-                id:
+                uid:
                     type: string
         api.console.administration.CreateMenuRequest:
             type: object
@@ -869,7 +1003,7 @@ components:
         api.console.administration.CreateUserReply:
             type: object
             properties:
-                id:
+                uid:
                     type: string
         api.console.administration.CreateUserRequest:
             type: object
@@ -884,12 +1018,43 @@ components:
                     type: string
                 re_password:
                     type: string
-                disabled:
-                    type: boolean
+                status:
+                    type: integer
+                    format: enum
                 role_ids:
                     type: array
                     items:
                         type: string
+        api.console.administration.CrontabInfo:
+            type: object
+            properties:
+                uid:
+                    type: string
+                name:
+                    type: string
+                    description: 任务名称
+                expr:
+                    type: string
+                    description: 任务表达式
+                action:
+                    type: string
+                    description: 任务动作
+                describe:
+                    type: string
+                    description: 任务描述
+                last_run_at:
+                    type: string
+                    description: 上次执行时间
+                    format: date-time
+                created_at:
+                    type: string
+                    format: date-time
+                updated_at:
+                    type: string
+                    format: date-time
+        api.console.administration.DeleteCrontabReply:
+            type: object
+            properties: {}
         api.console.administration.DeleteMenuReply:
             type: object
             properties: {}
@@ -909,6 +1074,11 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.RoleInfo'
+        api.console.administration.GetCrontabReply:
+            type: object
+            properties:
+                data:
+                    $ref: '#/components/schemas/api.console.administration.CrontabInfo'
         api.console.administration.GetMenuReply:
             type: object
             properties:
@@ -917,7 +1087,7 @@ components:
         api.console.administration.GetPermissionReply:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 name:
                     type: string
@@ -935,7 +1105,7 @@ components:
         api.console.administration.GetRoleReply:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 name:
                     type: string
@@ -974,6 +1144,15 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.PermissionInfo'
+        api.console.administration.ListCrontabReply:
+            type: object
+            properties:
+                pagination:
+                    $ref: '#/components/schemas/protobuf.Pagination'
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.CrontabInfo'
         api.console.administration.ListMenuReply:
             type: object
             properties:
@@ -1013,7 +1192,7 @@ components:
         api.console.administration.MenuInfo:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 pid:
                     type: string
@@ -1041,7 +1220,7 @@ components:
         api.console.administration.PermissionInfo:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 name:
                     type: string
@@ -1049,6 +1228,8 @@ components:
                     type: string
                 describe:
                     type: string
+                allow_delete:
+                    type: boolean
                 actions:
                     type: array
                     items:
@@ -1059,7 +1240,7 @@ components:
         api.console.administration.RoleInfo:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 name:
                     type: string
@@ -1077,9 +1258,6 @@ components:
         api.console.administration.RolePermission:
             type: object
             properties:
-                id:
-                    type: string
-                    description: 业务id
                 role_id:
                     type: string
                     description: 角色id
@@ -1109,20 +1287,40 @@ components:
         api.console.administration.UnbindPermissionRequest:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 permission_id:
                     type: string
         api.console.administration.UnbindRoleReply:
             type: object
             properties: {}
+        api.console.administration.UpdateCrontabReply:
+            type: object
+            properties: {}
+        api.console.administration.UpdateCrontabRequest:
+            type: object
+            properties:
+                uid:
+                    type: string
+                name:
+                    type: string
+                    description: 任务名称
+                expr:
+                    type: string
+                    description: 任务表达式
+                action:
+                    type: string
+                    description: 任务动作
+                describe:
+                    type: string
+                    description: 任务描述
         api.console.administration.UpdateMenuReply:
             type: object
             properties: {}
         api.console.administration.UpdateMenuRequest:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 pid:
                     type: string
@@ -1147,7 +1345,7 @@ components:
         api.console.administration.UpdatePermissionRequest:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 name:
                     type: string
@@ -1168,7 +1366,7 @@ components:
         api.console.administration.UpdateRoleRequest:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 name:
                     type: string
@@ -1185,9 +1383,11 @@ components:
         api.console.administration.UpdateUserRequest:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 email:
+                    type: string
+                username:
                     type: string
                 nickname:
                     type: string
@@ -1205,7 +1405,7 @@ components:
         api.console.administration.UserInfo:
             type: object
             properties:
-                id:
+                uid:
                     type: string
                 username:
                     type: string
@@ -1224,11 +1424,13 @@ components:
                 updated_at:
                     type: string
                     format: date-time
+                last_login:
+                    type: string
+                    format: date-time
                 role_ids:
                     type: array
                     items:
-                        type: integer
-                        format: int32
+                        type: string
         api.console.passport.AuthorizeMenuReply:
             type: object
             properties:
@@ -1245,6 +1447,10 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.console.administration.RoleInfo'
+                allow_menus:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.console.administration.MenuInfo'
         api.console.passport.LoginReply:
             type: object
             properties: {}
@@ -1361,6 +1567,7 @@ components:
             name: Authorization
             in: header
 tags:
+    - name: Crontab
     - name: Menu
     - name: Passport
     - name: Permission

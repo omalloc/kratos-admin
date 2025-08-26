@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/omalloc/contrib/protobuf"
+	"github.com/omalloc/kratos-admin/pkg/idgen"
 	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -23,6 +24,7 @@ func NewMenuService(usecase *biz.MenuUsecase) *MenuService {
 
 func (s *MenuService) CreateMenu(ctx context.Context, req *pb.CreateMenuRequest) (*pb.CreateMenuReply, error) {
 	m := &biz.Menu{
+		UID:    idgen.NextId(),
 		PID:    req.Pid,
 		Name:   req.Name,
 		Icon:   req.Icon,
@@ -37,20 +39,21 @@ func (s *MenuService) CreateMenu(ctx context.Context, req *pb.CreateMenuRequest)
 	}
 
 	return &pb.CreateMenuReply{
-		Id: m.ID,
+		Uid: m.UID,
 	}, nil
 }
 
 func (s *MenuService) UpdateMenu(ctx context.Context, req *pb.UpdateMenuRequest) (*pb.UpdateMenuReply, error) {
 	m := &biz.Menu{
-		ID:     req.Id,
-		PID:    req.Pid,
-		Name:   req.Name,
-		Icon:   req.Icon,
-		Path:   req.Path,
-		SortBy: req.SortBy,
-		Hidden: req.Hidden,
-		Status: int32(req.Status),
+		UID:          req.Uid,
+		PID:          req.Pid,
+		Name:         req.Name,
+		Icon:         req.Icon,
+		Path:         req.Path,
+		SortBy:       req.SortBy,
+		Hidden:       req.Hidden,
+		PermissionID: req.PermissionId,
+		Status:       int32(req.Status),
 	}
 
 	if err := s.usecase.Update(ctx, m); err != nil {
@@ -61,7 +64,7 @@ func (s *MenuService) UpdateMenu(ctx context.Context, req *pb.UpdateMenuRequest)
 }
 
 func (s *MenuService) DeleteMenu(ctx context.Context, req *pb.DeleteMenuRequest) (*pb.DeleteMenuReply, error) {
-	if err := s.usecase.Delete(ctx, req.Id); err != nil {
+	if err := s.usecase.Delete(ctx, req.Uid); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +72,7 @@ func (s *MenuService) DeleteMenu(ctx context.Context, req *pb.DeleteMenuRequest)
 }
 
 func (s *MenuService) GetMenu(ctx context.Context, req *pb.GetMenuRequest) (*pb.GetMenuReply, error) {
-	m, err := s.usecase.SelectByID(ctx, req.Id)
+	m, err := s.usecase.SelectByID(ctx, req.Uid)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +97,7 @@ func (s *MenuService) ListMenu(ctx context.Context, req *pb.ListMenuRequest) (*p
 
 func toMenuProto(m *biz.Menu, _ int) *pb.MenuInfo {
 	return &pb.MenuInfo{
-		Id:           m.ID,
+		Uid:          m.UID,
 		Pid:          m.PID,
 		PermissionId: m.PermissionID,
 		Name:         m.Name,

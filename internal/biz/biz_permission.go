@@ -8,10 +8,12 @@ import (
 )
 
 type Permission struct {
-	ID       int64     `json:"id" gorm:"primaryKey"`
+	ID       int64     `json:"id" gorm:"primaryKey;type:BIGINT;autoIncrement"`
+	UID      int64     `json:"uid" gorm:"column:uid;type:BIGINT;uniqueIndex:idx_uid_uk"`
 	Name     string    `json:"name" gorm:"column:name;type:varchar(64);comment:权限名"`
 	Alias    string    `json:"alias" gorm:"column:alias;type:varchar(64);comment:别名,展示名"`
 	Describe string    `json:"describe" gorm:"column:describe;type:varchar(255);comment:描述"`
+	Tags     []string  `json:"tags" gorm:"column:tags;type:json;serializer:json;comment:标签"`
 	Actions  []*Action `json:"actions" gorm:"column:actions;type:json;serializer:json;comment:操作"`
 	Status   int64     `json:"status" gorm:"column:status;type:int;comment:状态"`
 

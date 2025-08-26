@@ -42,12 +42,12 @@ type RoleHTTPServer interface {
 func RegisterRoleHTTPServer(s *http.Server, srv RoleHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/console/role", _Role_CreateRole0_HTTP_Handler(srv))
-	r.PUT("/api/console/role/{id}", _Role_UpdateRole0_HTTP_Handler(srv))
-	r.DELETE("/api/console/role/{id}", _Role_DeleteRole0_HTTP_Handler(srv))
-	r.GET("/api/console/role/{id}", _Role_GetRole0_HTTP_Handler(srv))
+	r.PUT("/api/console/role/{uid}", _Role_UpdateRole0_HTTP_Handler(srv))
+	r.DELETE("/api/console/role/{uid}", _Role_DeleteRole0_HTTP_Handler(srv))
+	r.GET("/api/console/role/{uid}", _Role_GetRole0_HTTP_Handler(srv))
 	r.GET("/api/console/role", _Role_ListRole0_HTTP_Handler(srv))
-	r.PUT("/api/console/role/{id}/permission", _Role_BindPermission0_HTTP_Handler(srv))
-	r.PUT("/api/console/role/{id}/permission/{permission_id}", _Role_UnbindPermission0_HTTP_Handler(srv))
+	r.PUT("/api/console/role/{uid}/permission", _Role_BindPermission0_HTTP_Handler(srv))
+	r.PUT("/api/console/role/{uid}/permission/{permission_id}", _Role_UnbindPermission0_HTTP_Handler(srv))
 	r.GET("/api/console/role-all", _Role_GetAll0_HTTP_Handler(srv))
 }
 
@@ -251,7 +251,7 @@ func NewRoleHTTPClient(client *http.Client) RoleHTTPClient {
 
 func (c *RoleHTTPClientImpl) BindPermission(ctx context.Context, in *BindPermissionRequest, opts ...http.CallOption) (*BindPermissionReply, error) {
 	var out BindPermissionReply
-	pattern := "/api/console/role/{id}/permission"
+	pattern := "/api/console/role/{uid}/permission"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationRoleBindPermission))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -277,7 +277,7 @@ func (c *RoleHTTPClientImpl) CreateRole(ctx context.Context, in *CreateRoleReque
 
 func (c *RoleHTTPClientImpl) DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...http.CallOption) (*DeleteRoleReply, error) {
 	var out DeleteRoleReply
-	pattern := "/api/console/role/{id}"
+	pattern := "/api/console/role/{uid}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRoleDeleteRole))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -303,7 +303,7 @@ func (c *RoleHTTPClientImpl) GetAll(ctx context.Context, in *GetAllRequest, opts
 
 func (c *RoleHTTPClientImpl) GetRole(ctx context.Context, in *GetRoleRequest, opts ...http.CallOption) (*GetRoleReply, error) {
 	var out GetRoleReply
-	pattern := "/api/console/role/{id}"
+	pattern := "/api/console/role/{uid}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRoleGetRole))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -329,7 +329,7 @@ func (c *RoleHTTPClientImpl) ListRole(ctx context.Context, in *ListRoleRequest, 
 
 func (c *RoleHTTPClientImpl) UnbindPermission(ctx context.Context, in *UnbindPermissionRequest, opts ...http.CallOption) (*UnbindPermissionReply, error) {
 	var out UnbindPermissionReply
-	pattern := "/api/console/role/{id}/permission/{permission_id}"
+	pattern := "/api/console/role/{uid}/permission/{permission_id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationRoleUnbindPermission))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -342,7 +342,7 @@ func (c *RoleHTTPClientImpl) UnbindPermission(ctx context.Context, in *UnbindPer
 
 func (c *RoleHTTPClientImpl) UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...http.CallOption) (*UpdateRoleReply, error) {
 	var out UpdateRoleReply
-	pattern := "/api/console/role/{id}"
+	pattern := "/api/console/role/{uid}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationRoleUpdateRole))
 	opts = append(opts, http.PathTemplate(pattern))

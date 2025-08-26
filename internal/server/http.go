@@ -44,19 +44,18 @@ func NewHTTPServer(c *conf.Server, passportc *conf.Passport, logger log.Logger,
 	permission *service.PermissionService,
 	passport *service.PassportService,
 	menu *service.MenuService,
+	crontab *service.CrontabService,
 ) *http.Server {
-	var opts = []http.ServerOption{
+	opts := []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
 			metadata.Server(),
 			tracing.Server(),
 			logging.Server(logger),
 			// JWT
-			selector.Server(
-				jwt.Server(func(token *jwtv5.Token) (any, error) {
-					return []byte(passportc.Secret), nil
-				}),
-			).Match(NewWhiteListMatcher()).Build(),
+			selector.Server(jwt.Server(func(token *jwtv5.Token) (any, error) {
+				return []byte(passportc.Secret), nil
+			})).Match(NewWhiteListMatcher()).Build(),
 		),
 	}
 	if c.Http.Network != "" {
@@ -75,6 +74,7 @@ func NewHTTPServer(c *conf.Server, passportc *conf.Passport, logger log.Logger,
 	adminpb.RegisterRoleHTTPServer(srv, role)
 	adminpb.RegisterPermissionHTTPServer(srv, permission)
 	adminpb.RegisterMenuHTTPServer(srv, menu)
+	adminpb.RegisterCrontabHTTPServer(srv, crontab)
 	passportpb.RegisterPassportHTTPServer(srv, passport)
 	return srv
 }

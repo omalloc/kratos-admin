@@ -17,28 +17,29 @@ import (
 )
 
 type User struct {
-	ID       int64  `json:"id" gorm:"primaryKey"`
-	Username string `json:"username" gorm:"column:username;type:varchar(64);comment:用户名"`
-	Password string `json:"-" gorm:"column:password;type:varchar(64);comment:密码"`
-	Email    string `json:"email" gorm:"column:email;type:varchar(64);comment:邮箱"`
-	Nickname string `json:"nickname" gorm:"column:nickname;type:varchar(64);comment:昵称"`
-	Bio      string `json:"bio" gorm:"column:bio;type:varchar(255);comment:个人简介"`
-	AvatarID int64  `json:"avatar_id" gorm:"column:avatar_id;comment:头像"`
-	Status   int64  `json:"status" gorm:"column:status;type:int;comment:状态"` // 0: 禁用, 1: 正常
+	ID        int64     `json:"id" gorm:"primaryKey;type:BIGINT;autoIncrement;"`
+	UID       int64     `json:"uid" gorm:"column:uid;type:BIGINT;uniqueIndex:idx_uid_uk"`
+	Username  string    `json:"username" gorm:"column:username;type:varchar(64);comment:用户名"`
+	Password  string    `json:"-" gorm:"column:password;type:varchar(64);comment:密码"`
+	Email     string    `json:"email" gorm:"column:email;type:varchar(64);comment:邮箱"`
+	Nickname  string    `json:"nickname" gorm:"column:nickname;type:varchar(64);comment:昵称"`
+	Bio       string    `json:"bio" gorm:"column:bio;type:varchar(255);comment:个人简介"`
+	AvatarID  int64     `json:"avatar_id" gorm:"column:avatar_id;comment:头像"`
+	Status    int64     `json:"status" gorm:"column:status;type:int;comment:状态"` // 0: 禁用, 1: 正常
+	LastLogin time.Time `json:"last_login" gorm:"column:last_login;comment:上次登录时间"`
 
 	orm.DBModel
+}
+
+type UserQueryFilter struct {
+	Status   int
+	Username string
 }
 
 type UserInfo struct {
 	User
 
 	RoleIDs []int64 `json:"role_ids" gorm:"serializer:intslice"`
-}
-
-type TempUserInfo struct {
-	User
-
-	RoleIDs string `json:"role_ids" `
 }
 
 type UserRoleInfo struct {
@@ -52,9 +53,9 @@ func (User) TableName() string {
 }
 
 type UserRole struct {
-	ID        int64     `json:"id" gorm:"primaryKey"`
-	UserID    int64     `json:"user_id" gorm:"column:user_id;type:int;uniqueIndex:idx_unique_user_role;comment:用户ID"`
-	RoleID    int       `json:"role_id" gorm:"column:role_id;type:int;uniqueIndex:idx_unique_user_role;comment:角色ID"`
+	ID        int64     `json:"id" gorm:"primaryKey;type:BIGINT;autoIncrement"`
+	UserID    int64     `json:"user_id" gorm:"column:user_id;type:BIGINT;uniqueIndex:idx_unique_user_role;comment:用户ID"`
+	RoleID    int64     `json:"role_id" gorm:"column:role_id;type:BIGINT;uniqueIndex:idx_unique_user_role;comment:角色ID"`
 	CreatedAt time.Time `json:"created_at" gorm:"column:created_at;type:datetime;comment:创建时间"` // 授权时间
 }
 
@@ -63,19 +64,21 @@ func (UserRole) TableName() string {
 }
 
 type UserRepo interface {
-	SelectList(ctx context.Context, pagination *protobuf.Pagination) ([]*UserInfo, error)
-	SelectUserByID(ctx context.Context, id int64) (*UserInfo, error)
+	SelectList(ctx context.Context, pagination *protobuf.Pagination, filter *UserQueryFilter) ([]*UserInfo, error)
+	SelectUserByUID(ctx context.Context, uid int64) (*UserInfo, error)
 	SelectUserByName(ctx context.Context, name string) (*User, error)
 	SelectUserByEmail(ctx context.Context, email string) (*User, error)
 	SelectUserByNameOrEmail(ctx context.Context, value string) (*User, error)
 
-	BindRole(ctx context.Context, userID int64, roleID int) error
-	UnbindRole(ctx context.Context, userID int64, roleID int) error
+	BindRole(ctx context.Context, userID int64, roleID int64) error
+	UnbindRole(ctx context.Context, userID int64, roleID int64) error
 	UpdateRole(ctx context.Context, userID int64, roleIDs []int64) error
 
 	Create(ctx context.Context, user *User) error
-	Update(ctx context.Context, id int64, user *User) error
-	Delete(ctx context.Context, id int64) error
+	Update(ctx context.Context, uid int64, user *User) error
+	Delete(ctx context.Context, uid int64) error
+	UpdateStatus(ctx context.Context, uid int64, status int64) error
+	UpdateLastLogin(ctx context.Context, uid int64) error
 }
 
 type UserUsecase struct {
@@ -117,14 +120,14 @@ func (uc *UserUsecase) CreateUser(ctx context.Context, user *User) error {
 }
 
 // GetUser 获取用户信息
-func (uc *UserUsecase) GetUser(ctx context.Context, id int64) (*UserRoleInfo, error) {
+func (uc *UserUsecase) GetUser(ctx context.Context, uid int64) (*UserRoleInfo, error) {
 	var (
 		ret UserRoleInfo
 		err error
 	)
 
 	err = uc.txm.Transaction(ctx, func(ctx context.Context) error {
-		user, err := uc.userRepo.SelectUserByID(ctx, id)
+		user, err := uc.userRepo.SelectUserByUID(ctx, uid)
 		if err != nil {
 			return err
 		}
@@ -138,16 +141,15 @@ func (uc *UserUsecase) GetUser(ctx context.Context, id int64) (*UserRoleInfo, er
 		ret.Roles = lo.Map(roles, func(item *RoleJoinPermission, _ int) *Role {
 			return &Role{
 				ID:          item.ID,
+				UID:         item.UID,
 				Name:        item.Name,
 				Describe:    item.Describe,
 				Status:      item.Status,
 				Permissions: item.Permissions,
 			}
 		})
-
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -156,32 +158,32 @@ func (uc *UserUsecase) GetUser(ctx context.Context, id int64) (*UserRoleInfo, er
 
 // UpdateUser 更新用户信息
 func (uc *UserUsecase) UpdateUser(ctx context.Context, user *User) error {
-	if user.ID <= 0 {
-		return errors.New(400, "INVALID_USER_ID", "无效的用户ID")
+	if user.UID <= 0 {
+		return errors.New(400, "INVALID_USER_UID", "无效的用户ID")
 	}
-	return uc.userRepo.Update(ctx, user.ID, user)
+	return uc.userRepo.Update(ctx, user.UID, user)
 }
 
 // DeleteUser 删除用户
 func (uc *UserUsecase) DeleteUser(ctx context.Context, id int64) error {
 	if id <= 0 {
-		return errors.New(400, "INVALID_USER_ID", "无效的用户ID")
+		return errors.New(400, "INVALID_USER_UID", "无效的用户ID")
 	}
 	return uc.userRepo.Delete(ctx, id)
 }
 
 // ListUser 获取用户列表
-func (uc *UserUsecase) ListUser(ctx context.Context, pagination *protobuf.Pagination) ([]*UserInfo, error) {
-	return uc.userRepo.SelectList(ctx, pagination)
+func (uc *UserUsecase) ListUser(ctx context.Context, pagination *protobuf.Pagination, filter *UserQueryFilter) ([]*UserInfo, error) {
+	return uc.userRepo.SelectList(ctx, pagination, filter)
 }
 
-func (uc *UserUsecase) BindRole(ctx context.Context, userID int64, roleID int) error {
+func (uc *UserUsecase) BindRole(ctx context.Context, userID int64, roleID int64) error {
 	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
 		return uc.userRepo.BindRole(ctx, userID, roleID)
 	})
 }
 
-func (uc *UserUsecase) UnbindRole(ctx context.Context, userID int64, roleID int) error {
+func (uc *UserUsecase) UnbindRole(ctx context.Context, userID int64, roleID int64) error {
 	return uc.txm.Transaction(ctx, func(ctx context.Context) error {
 		return uc.userRepo.UnbindRole(ctx, userID, roleID)
 	})
@@ -197,13 +199,13 @@ func (uc *UserUsecase) Login(ctx context.Context, username string, password stri
 	user, err := uc.userRepo.SelectUserByNameOrEmail(ctx, username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, passportpb.ErrorUserOrPasswordError("")
+			return nil, passportpb.ErrorUserOrPasswordError("用户或密码不正确")
 		}
 		return nil, err
 	}
 
 	if user.Password == "" {
-		return nil, passportpb.ErrorUserOrPasswordError("")
+		return nil, passportpb.ErrorUserOrPasswordError("用户或密码不正确")
 	}
 
 	// 密码前缀检查，如果非加密密码 进行一次加密并保存
@@ -215,18 +217,20 @@ func (uc *UserUsecase) Login(ctx context.Context, username string, password stri
 		user.Password = string(buf)
 
 		// 更新一次加密密码
-		if err1 := uc.userRepo.Update(ctx, user.ID, user); err1 != nil {
+		if err1 := uc.userRepo.Update(ctx, user.UID, user); err1 != nil {
 			return nil, err1
 		}
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
-		return nil, errors.New(400, "USER_OR_PASSWORD_ERROR", "用户名或密码错误")
+		return nil, passportpb.ErrorUserOrPasswordError("用户或密码不正确")
 	}
 
-	if user.Status == 0 {
+	if user.Status != 1 {
 		return nil, errors.New(400, "USER_DISABLED", "用户已禁用")
 	}
+
+	_ = uc.userRepo.UpdateLastLogin(ctx, user.UID)
 
 	return user, nil
 }
@@ -249,6 +253,6 @@ func (uc *UserUsecase) UpdatePassword(ctx context.Context, email string, passwor
 		}
 
 		user.Password = newPassword
-		return uc.userRepo.Update(ctx, user.ID, user)
+		return uc.userRepo.Update(ctx, user.UID, user)
 	})
 }

@@ -28,6 +28,8 @@ var ProviderSet = wire.NewSet(
 	registry.NewDiscovery,
 
 	health.NewServer,
+
+	NewBackgroundTaskManager,
 )
 
 func NewRegistryConfig(bc *conf.Bootstrap) *protobuf.Registry {

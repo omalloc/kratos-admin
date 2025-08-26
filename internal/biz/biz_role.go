@@ -11,7 +11,8 @@ import (
 )
 
 type Role struct {
-	ID       int64  `json:"id" gorm:"primaryKey"`
+	ID       int64  `json:"id" gorm:"primaryKey;type:BIGINT;autoIncrement"`
+	UID      int64  `json:"uid" gorm:"column:uid;type:BIGINT;uniqueIndex:idx_uid_uk"`
 	Name     string `json:"name" gorm:"column:name;type:varchar(64);comment:角色唯一标识"`
 	Alias    string `json:"alias" gorm:"column:alias;type:varchar(64);comment:角色别名"`
 	Describe string `json:"describe" gorm:"column:describe;type:varchar(255);comment:描述"`
@@ -27,9 +28,9 @@ func (Role) TableName() string {
 }
 
 type RolePermission struct {
-	ID         int64     `json:"id" gorm:"primaryKey"`
-	RoleID     int64     `json:"role_id" gorm:"column:role_id;type:int;comment:角色ID"`
-	PermID     int64     `json:"perm_id" gorm:"column:perm_id;type:int;comment:权限ID"`
+	ID         int64     `json:"id" gorm:"primaryKey;type:BIGINT;autoIncrement"`
+	RoleID     int64     `json:"role_id" gorm:"column:role_id;type:BIGINT;comment:角色ID"`
+	PermID     int64     `json:"perm_id" gorm:"column:perm_id;type:BIGINT;comment:权限ID"`
 	Actions    []*Action `json:"actions" gorm:"column:actions;type:json;serializer:json;comment:操作"`
 	DataAccess []*Action `json:"data_access,omitempty" gorm:"column:data_access;type:json;serializer:json;comment:数据权限"`
 	CreatedAt  time.Time `json:"created_at" gorm:"column:created_at;type:datetime;comment:创建时间"`
@@ -44,7 +45,7 @@ func (RolePermission) TableName() string {
 type RoleJoinPermission struct {
 	Role
 
-	Permissions []*RolePermission `json:"permissions" gorm:"foreignKey:RoleID;references:ID"`
+	Permissions []*RolePermission `json:"permissions" gorm:"foreignKey:RoleID;references:UID"`
 }
 
 func (RoleJoinPermission) TableName() string {

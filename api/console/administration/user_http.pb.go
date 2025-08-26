@@ -40,12 +40,12 @@ type UserHTTPServer interface {
 func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/console/user", _User_CreateUser0_HTTP_Handler(srv))
-	r.PUT("/api/console/user/{id}", _User_UpdateUser0_HTTP_Handler(srv))
-	r.DELETE("/api/console/user/{id}", _User_DeleteUser0_HTTP_Handler(srv))
-	r.GET("/api/console/user/{id}", _User_GetUser0_HTTP_Handler(srv))
+	r.PUT("/api/console/user/{uid}", _User_UpdateUser0_HTTP_Handler(srv))
+	r.DELETE("/api/console/user/{uid}", _User_DeleteUser0_HTTP_Handler(srv))
+	r.GET("/api/console/user/{uid}", _User_GetUser0_HTTP_Handler(srv))
 	r.GET("/api/console/user", _User_ListUser0_HTTP_Handler(srv))
-	r.POST("/api/console/user/{id}/role", _User_BindRole0_HTTP_Handler(srv))
-	r.DELETE("/api/console/user/{id}/role/{role_id}", _User_UnbindRole0_HTTP_Handler(srv))
+	r.POST("/api/console/user/{uid}/role", _User_BindRole0_HTTP_Handler(srv))
+	r.DELETE("/api/console/user/{uid}/role/{role_id}", _User_UnbindRole0_HTTP_Handler(srv))
 }
 
 func _User_CreateUser0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
@@ -225,7 +225,7 @@ func NewUserHTTPClient(client *http.Client) UserHTTPClient {
 
 func (c *UserHTTPClientImpl) BindRole(ctx context.Context, in *BindRoleRequest, opts ...http.CallOption) (*BindRoleReply, error) {
 	var out BindRoleReply
-	pattern := "/api/console/user/{id}/role"
+	pattern := "/api/console/user/{uid}/role"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserBindRole))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -251,7 +251,7 @@ func (c *UserHTTPClientImpl) CreateUser(ctx context.Context, in *CreateUserReque
 
 func (c *UserHTTPClientImpl) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...http.CallOption) (*DeleteUserReply, error) {
 	var out DeleteUserReply
-	pattern := "/api/console/user/{id}"
+	pattern := "/api/console/user/{uid}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserDeleteUser))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -264,7 +264,7 @@ func (c *UserHTTPClientImpl) DeleteUser(ctx context.Context, in *DeleteUserReque
 
 func (c *UserHTTPClientImpl) GetUser(ctx context.Context, in *GetUserRequest, opts ...http.CallOption) (*GetUserReply, error) {
 	var out GetUserReply
-	pattern := "/api/console/user/{id}"
+	pattern := "/api/console/user/{uid}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserGetUser))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -290,7 +290,7 @@ func (c *UserHTTPClientImpl) ListUser(ctx context.Context, in *ListUserRequest, 
 
 func (c *UserHTTPClientImpl) UnbindRole(ctx context.Context, in *UnbindRoleRequest, opts ...http.CallOption) (*UnbindRoleReply, error) {
 	var out UnbindRoleReply
-	pattern := "/api/console/user/{id}/role/{role_id}"
+	pattern := "/api/console/user/{uid}/role/{role_id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserUnbindRole))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -303,7 +303,7 @@ func (c *UserHTTPClientImpl) UnbindRole(ctx context.Context, in *UnbindRoleReque
 
 func (c *UserHTTPClientImpl) UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...http.CallOption) (*UpdateUserReply, error) {
 	var out UpdateUserReply
-	pattern := "/api/console/user/{id}"
+	pattern := "/api/console/user/{uid}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserUpdateUser))
 	opts = append(opts, http.PathTemplate(pattern))

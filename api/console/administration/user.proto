@@ -20,15 +20,15 @@ service User {
 	};
 	rpc UpdateUser (UpdateUserRequest) returns (UpdateUserReply) {
 		option (google.api.http) = {
-			put: "/api/console/user/{id}"
+			put: "/api/console/user/{uid}"
 			body: "*"
 		};
 	};
 	rpc DeleteUser (DeleteUserRequest) returns (DeleteUserReply) {
-		option (google.api.http).delete = "/api/console/user/{id}";
+		option (google.api.http).delete = "/api/console/user/{uid}";
 	}
 	rpc GetUser (GetUserRequest) returns (GetUserReply) {
-		option (google.api.http).get = "/api/console/user/{id}";
+		option (google.api.http).get = "/api/console/user/{uid}";
 	}
 	rpc ListUser (ListUserRequest) returns (ListUserReply) {
 		option (google.api.http).get = "/api/console/user";
@@ -36,13 +36,13 @@ service User {
 
 	rpc BindRole (BindRoleRequest) returns (BindRoleReply) {
 		option (google.api.http) = {
-			post: "/api/console/user/{id}/role"
+			post: "/api/console/user/{uid}/role"
 			body: "*"
 		};
 	}
 	rpc UnbindRole (UnbindRoleRequest) returns (UnbindRoleReply) {
 		option (google.api.http) = {
-			delete: "/api/console/user/{id}/role/{role_id}"
+			delete: "/api/console/user/{uid}/role/{role_id}"
 		};
 	}
 }
@@ -59,7 +59,7 @@ enum UserStatus {
 }
 
 message UserInfo {
-	int64 id = 1;
+	int64 uid = 1;
 	string username = 2;
 	string email = 3;
 	string nickname = 4;
@@ -67,7 +67,8 @@ message UserInfo {
 	UserStatus status = 6;
 	google.protobuf.Timestamp created_at = 7;
 	google.protobuf.Timestamp updated_at = 8;
-	repeated int32 role_ids = 10;
+  google.protobuf.Timestamp last_login = 9;
+	repeated int64 role_ids = 10;
 }
 
 message CreateUserRequest {
@@ -76,32 +77,33 @@ message CreateUserRequest {
 	string email = 3;
 	string password = 4;
 	string re_password = 5;
-	bool disabled = 6;
+  UserStatus status = 6;
 	repeated string role_ids = 7;
 }
 
 message CreateUserReply {
-	int64 id = 1;
+	int64 uid = 1;
 }
 
 message UpdateUserRequest {
-	int64 id = 1;
+	int64 uid = 1;
 	string email = 2;
-	string nickname = 3;
-	string password = 4;
-	string re_password = 5;
-	UserStatus status = 6;
-	repeated string role_ids = 7;
+	string username = 3;
+	string nickname = 4;
+	string password = 5;
+	string re_password = 6;
+	UserStatus status = 7;
+	repeated string role_ids = 8;
 }
 message UpdateUserReply {}
 
 message DeleteUserRequest {
-	int64 id = 1;
+	int64 uid = 1;
 }
 message DeleteUserReply {}
 
 message GetUserRequest {
-	int64 id = 1;
+	int64 uid = 1;
 }
 message GetUserReply {
 	UserInfo user = 1;
@@ -110,6 +112,9 @@ message GetUserReply {
 
 message ListUserRequest {
 	protobuf.Pagination pagination = 1;
+  UserStatus status = 2;
+  string username = 3;
+  string email = 4;
 }
 message ListUserReply {
 	protobuf.Pagination pagination = 1;
@@ -117,13 +122,13 @@ message ListUserReply {
 }
 
 message BindRoleRequest {
-	int64 id = 1;
+	int64 uid = 1;
 	int64 role_id = 2;
 }
 message BindRoleReply {}
 
 message UnbindRoleRequest {
-	int64 id = 1;
+	int64 uid = 1;
 	int64 role_id = 2;
 }
 message UnbindRoleReply {}

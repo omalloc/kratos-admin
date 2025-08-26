@@ -6,8 +6,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/omalloc/contrib/kratos/orm"
 	"github.com/omalloc/contrib/protobuf"
-	"gorm.io/gorm"
-
 	"github.com/omalloc/kratos-admin/internal/biz"
 )
 
@@ -31,30 +29,21 @@ func (r *menuRepo) Create(ctx context.Context, m *biz.Menu) error {
 
 // Update 更新菜单
 func (r *menuRepo) Update(ctx context.Context, m *biz.Menu) error {
-	return r.txm.WithContext(ctx).Model(&biz.Menu{}).Where("id = ?", m.ID).Updates(map[string]interface{}{
-		"pid":        m.PID,
-		"name":       m.Name,
-		"icon":       m.Icon,
-		"path":       m.Path,
-		"sort_by":    m.SortBy,
-		"hidden":     m.Hidden,
-		"status":     m.Status,
-		"updated_at": m.UpdatedAt,
-	}).Error
+	return r.txm.WithContext(ctx).Model(&biz.Menu{}).
+		Where("uid = ?", m.UID).
+		Updates(m).Error
 }
 
 // Delete 删除菜单
-func (r *menuRepo) Delete(ctx context.Context, id int64) error {
-	return r.txm.WithContext(ctx).Delete(&biz.Menu{}, id).Error
+func (r *menuRepo) Delete(ctx context.Context, uid int64) error {
+	return r.txm.WithContext(ctx).Model(&biz.Menu{}).Delete("uid = ?", uid).Error
 }
 
 // Get 获取菜单
-func (r *menuRepo) Get(ctx context.Context, id int64) (*biz.Menu, error) {
+func (r *menuRepo) Get(ctx context.Context, uid int64) (*biz.Menu, error) {
 	var m biz.Menu
-	if err := r.txm.WithContext(ctx).First(&m, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, err
-		}
+	if err := r.txm.WithContext(ctx).Model(&biz.Menu{}).
+		Where("uid = ?", uid).First(&m).Error; err != nil {
 		return nil, err
 	}
 	return &m, nil

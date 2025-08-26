@@ -9,4 +9,5 @@ var ProviderSet = wire.NewSet(
 	NewRoleUsecase,
 	NewPermissionUsecase,
 	NewMenuUsecase,
+	NewCrontabUsecase,
 )

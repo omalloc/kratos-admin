@@ -36,7 +36,7 @@ func (s *RoleService) CreateRole(ctx context.Context, req *pb.CreateRoleRequest)
 }
 func (s *RoleService) UpdateRole(ctx context.Context, req *pb.UpdateRoleRequest) (*pb.UpdateRoleReply, error) {
 	if err := s.usecase.UpdateRole(ctx, &biz.Role{
-		ID:       req.Id,
+		UID:      req.Uid,
 		Name:     req.Name,
 		Alias:    req.Alias,
 		Describe: req.Describe,
@@ -47,25 +47,24 @@ func (s *RoleService) UpdateRole(ctx context.Context, req *pb.UpdateRoleRequest)
 	return &pb.UpdateRoleReply{}, nil
 }
 func (s *RoleService) DeleteRole(ctx context.Context, req *pb.DeleteRoleRequest) (*pb.DeleteRoleReply, error) {
-	if err := s.usecase.DeleteRole(ctx, req.Id); err != nil {
+	if err := s.usecase.DeleteRole(ctx, req.Uid); err != nil {
 		return nil, err
 	}
 	return &pb.DeleteRoleReply{}, nil
 }
 func (s *RoleService) GetRole(ctx context.Context, req *pb.GetRoleRequest) (*pb.GetRoleReply, error) {
-	role, err := s.usecase.SelectID(ctx, req.Id)
+	role, err := s.usecase.SelectID(ctx, req.Uid)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.GetRoleReply{
-		Id:       role.ID,
+		Uid:      role.UID,
 		Name:     role.Name,
 		Alias:    role.Alias,
 		Describe: role.Describe,
 		Status:   int32(role.Status),
 		Permissions: lo.Map(role.Permissions, func(item *biz.RolePermission, _ int) *pb.RolePermission {
 			return &pb.RolePermission{
-				Id:         item.ID,
 				RoleId:     item.RoleID,
 				PermId:     item.PermID,
 				Actions:    lo.Map(item.Actions, fromAction),
@@ -91,7 +90,7 @@ func (s *RoleService) BindPermission(ctx context.Context, req *pb.BindPermission
 	for _, item := range req.Data {
 		actions := lo.Map(item.Actions, toAction)
 		dataAccess := lo.Map(item.DataAccess, toAction)
-		if err := s.usecase.BindPermission(ctx, req.Id, item.PermissionId, actions, dataAccess); err != nil {
+		if err := s.usecase.BindPermission(ctx, req.Uid, item.PermissionId, actions, dataAccess); err != nil {
 			return nil, err
 		}
 	}
@@ -99,7 +98,7 @@ func (s *RoleService) BindPermission(ctx context.Context, req *pb.BindPermission
 	return &pb.BindPermissionReply{}, nil
 }
 func (s *RoleService) UnbindPermission(ctx context.Context, req *pb.UnbindPermissionRequest) (*pb.UnbindPermissionReply, error) {
-	if err := s.usecase.UnbindPermission(ctx, req.Id, req.PermissionId); err != nil {
+	if err := s.usecase.UnbindPermission(ctx, req.Uid, req.PermissionId); err != nil {
 		return nil, err
 	}
 	return &pb.UnbindPermissionReply{}, nil
@@ -117,7 +116,7 @@ func (s *RoleService) GetAll(ctx context.Context, req *pb.GetAllRequest) (*pb.Ge
 
 func (s *RoleService) toRoleMap(item *biz.Role, _ int) *pb.RoleInfo {
 	return &pb.RoleInfo{
-		Id:          item.ID,
+		Uid:         item.UID,
 		Name:        item.Name,
 		Describe:    item.Describe,
 		Alias:       item.Alias,
@@ -128,7 +127,7 @@ func (s *RoleService) toRoleMap(item *biz.Role, _ int) *pb.RoleInfo {
 
 func (s *RoleService) toRoleJoinedMap(item *biz.RoleJoinPermission, _ int) *pb.RoleInfo {
 	return &pb.RoleInfo{
-		Id:          item.ID,
+		Uid:         item.UID,
 		Name:        item.Name,
 		Describe:    item.Describe,
 		Alias:       item.Alias,
@@ -138,7 +137,6 @@ func (s *RoleService) toRoleJoinedMap(item *biz.RoleJoinPermission, _ int) *pb.R
 }
 func (s *RoleService) toPermission(item *biz.RolePermission, _ int) *pb.RolePermission {
 	return &pb.RolePermission{
-		Id:         item.ID,
 		RoleId:     item.RoleID,
 		PermId:     item.PermID,
 		Actions:    lo.Map(item.Actions, fromAction),

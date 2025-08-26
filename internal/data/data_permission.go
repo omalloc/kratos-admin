@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/omalloc/contrib/kratos/orm"
 	"github.com/omalloc/contrib/protobuf"
 
@@ -22,17 +23,32 @@ func (r *permissionRepo) Create(ctx context.Context, permission *biz.Permission)
 	return r.txm.WithContext(ctx).Create(permission).Error
 }
 
-func (r *permissionRepo) Update(ctx context.Context, id int64, permission *biz.Permission) error {
-	return r.txm.WithContext(ctx).Where("id = ?", id).Updates(permission).Error
+func (r *permissionRepo) Update(ctx context.Context, uid int64, permission *biz.Permission) error {
+	return r.txm.WithContext(ctx).
+		Where("uid = ?", uid).
+		Updates(permission).Error
 }
 
-func (r *permissionRepo) Delete(ctx context.Context, id int64) error {
-	return r.txm.WithContext(ctx).Where("id = ?", id).Delete(&biz.Permission{}).Error
+func (r *permissionRepo) Delete(ctx context.Context, uid int64) error {
+	return r.txm.Transaction(ctx, func(ctx context.Context) error {
+		var perm biz.Permission
+		if err := r.txm.WithContext(ctx).Where("uid = ?", uid).Find(&perm).Error; err != nil {
+			return err
+		}
+
+		if len(perm.Tags) > 0 {
+			return errors.New(400, "FAIL_DELETE_RECORD_WITH_RULE", "由于规则限制无法删除该记录")
+		}
+
+		return r.txm.WithContext(ctx).
+			Where("uid = ?", uid).
+			Delete(&biz.Permission{}).Error
+	})
 }
 
-func (r *permissionRepo) GetPermission(ctx context.Context, id int64) (*biz.Permission, error) {
+func (r *permissionRepo) GetPermission(ctx context.Context, uid int64) (*biz.Permission, error) {
 	var permission biz.Permission
-	if err := r.txm.WithContext(ctx).Where("id = ?", id).First(&permission).Error; err != nil {
+	if err := r.txm.WithContext(ctx).Where("uid = ?", uid).First(&permission).Error; err != nil {
 		return nil, err
 	}
 

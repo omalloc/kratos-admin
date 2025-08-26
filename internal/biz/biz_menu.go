@@ -11,14 +11,15 @@ import (
 )
 
 type Menu struct {
-	ID           int64     `json:"id" gorm:"primaryKey"`
-	PID          int64     `json:"pid" gorm:"column:pid;type:int;comment:父级ID"`
-	PermissionID int64     `json:"permission_id" gorm:"column:permission_id;type:int;comment:权限ID"`
+	ID           int64     `json:"id" gorm:"primaryKey;type:BIGINT;autoIncrement"`
+	UID          int64     `json:"uid" gorm:"column:uid;type:BIGINT;uniqueIndex:idx_uid_uk"`
+	PID          int64     `json:"pid" gorm:"column:pid;type:BIGINT;comment:父级ID"` // zero is root node.
+	PermissionID int64     `json:"permission_id" gorm:"column:permission_id;type:BIGINT;comment:权限ID"`
 	Name         string    `json:"name" gorm:"column:name;type:varchar(255);comment:名称"`
 	Icon         string    `json:"icon" gorm:"column:icon;type:varchar(255);comment:图标"`
 	Path         string    `json:"path" gorm:"column:path;type:varchar(255);comment:路径"`
 	SortBy       int64     `json:"sort_by" gorm:"column:sort_by;type:int;comment:排序"`
-	Hidden       bool      `json:"hidden" gorm:"column:hidden;type:tinyint;comment:是否隐藏"`
+	Hidden       bool      `json:"hidden" gorm:"column:hidden;type:tinyint;comment:是否隐藏=0显示1隐藏"`
 	Status       int32     `json:"status" gorm:"column:status;type:int;comment:状态"`
 	CreatedAt    time.Time `json:"created_at" gorm:"column:created_at;type:datetime;comment:创建时间"`
 	UpdatedAt    time.Time `json:"updated_at" gorm:"column:updated_at;type:datetime;comment:更新时间"`

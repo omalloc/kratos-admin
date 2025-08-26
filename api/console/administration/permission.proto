@@ -18,17 +18,17 @@ service Permission {
 	}
 	rpc UpdatePermission (UpdatePermissionRequest) returns (UpdatePermissionReply){
 		option (google.api.http) = {
-			put: "/api/console/permission/{id}"
+			put: "/api/console/permission/{uid}"
 			body: "*"
 		};
 	}
 	rpc DeletePermission (DeletePermissionRequest) returns (DeletePermissionReply){
 		option (google.api.http) = {
-			delete: "/api/console/permission/{id}"
+			delete: "/api/console/permission/{uid}"
 		};
 	}	
 	rpc GetPermission (GetPermissionRequest) returns (GetPermissionReply){
-		option (google.api.http).get = "/api/console/permission/{id}";
+		option (google.api.http).get = "/api/console/permission/{uid}";
 	}
 	rpc ListPermission (ListPermissionRequest) returns (ListPermissionReply){
 		option (google.api.http).get = "/api/console/permission";
@@ -51,12 +51,13 @@ message Action {
 }
 
 message PermissionInfo {
-	int64 id = 1;
+	int64 uid = 1;
 	string name = 2;
 	string alias = 3;
 	string describe = 4;
-	repeated Action actions = 5;
-	PermissionStatus status = 6;
+  bool allow_delete = 5;
+  repeated Action actions = 6;
+	PermissionStatus status = 7;
 }
 
 message CreatePermissionRequest {
@@ -69,7 +70,7 @@ message CreatePermissionRequest {
 message CreatePermissionReply {}
 
 message UpdatePermissionRequest {
-	int64 id = 1;
+	int64 uid = 1;
 	string name = 2;
 	string alias = 3;
 	string describe = 4;
@@ -79,15 +80,15 @@ message UpdatePermissionRequest {
 message UpdatePermissionReply {}
 
 message DeletePermissionRequest {
-	int64 id = 1;
+	int64 uid = 1;
 }
 message DeletePermissionReply {}
 
 message GetPermissionRequest {
-	int64 id = 1;
+	int64 uid = 1;
 }
 message GetPermissionReply {
-	int64 id = 1;
+	int64 uid = 1;
 	string name = 2;
 	string alias = 3;
 	string describe = 4;

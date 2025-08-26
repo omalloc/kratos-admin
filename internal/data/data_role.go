@@ -41,11 +41,11 @@ func (r *roleRepo) SelectByName(ctx context.Context, name string) (*biz.Role, er
 	return &role, err
 }
 
-func (r *roleRepo) SelectID(ctx context.Context, id int64) (*biz.RoleJoinPermission, error) {
+func (r *roleRepo) SelectID(ctx context.Context, uid int64) (*biz.RoleJoinPermission, error) {
 	var ret *biz.RoleJoinPermission
 
 	err := r.txm.WithContext(ctx).Model(&biz.RoleJoinPermission{}).
-		Where("roles.id = ?", id).
+		Where("roles.uid = ?", uid).
 		Preload(clause.Associations).
 		Find(&ret).Error
 
@@ -86,7 +86,7 @@ func (r *roleRepo) SelectByUserID(ctx context.Context, userID int64) ([]*biz.Rol
 	var roles []*biz.Role
 
 	err := r.txm.WithContext(ctx).Model(&biz.Role{}).
-		Joins("LEFT JOIN users_bind_role ON roles.id = users_bind_role.role_id").
+		Joins("LEFT JOIN users_bind_role ON roles.uid = users_bind_role.role_id").
 		Where("users_bind_role.user_id = ?", userID).
 		Find(&roles).Error
 
@@ -103,7 +103,7 @@ func (r *roleRepo) SelectRolePermission(ctx context.Context, roleIDs []int64) ([
 
 	txm := r.txm.WithContext(ctx)
 	err := txm.Model(&biz.Role{}).
-		Where("roles.id IN (?)", roleIDs).
+		Where("roles.uid IN (?)", roleIDs).
 		Find(&roles).Error
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (r *roleRepo) SelectRolePermission(ctx context.Context, roleIDs []int64) ([
 	// query role_permissions
 	err = txm.Model(&biz.RolePermission{}).
 		Select("roles_bind_permission.*, permissions.name, permissions.alias").
-		Joins("LEFT JOIN permissions ON roles_bind_permission.perm_id = permissions.id").
+		Joins("LEFT JOIN permissions ON roles_bind_permission.perm_id = permissions.uid").
 		Where("roles_bind_permission.role_id IN (?)", roleIDs).
 		Find(&rolePermissions).Error
 
@@ -120,7 +120,7 @@ func (r *roleRepo) SelectRolePermission(ctx context.Context, roleIDs []int64) ([
 		return &biz.RoleJoinPermission{
 			Role: *role,
 			Permissions: lo.Filter(rolePermissions, func(item *biz.RolePermission, _ int) bool {
-				return item.RoleID == role.ID
+				return item.RoleID == role.UID
 			}),
 		}
 	})
@@ -161,8 +161,8 @@ func (r *roleRepo) UnbindPermission(ctx context.Context, roleID int64, permissio
 		Delete(&biz.RolePermission{}).Error
 }
 
-func (r *roleRepo) Update(ctx context.Context, id int64, role *biz.Role) error {
-	return r.txm.WithContext(ctx).Where("id = ?", id).Updates(role).Error
+func (r *roleRepo) Update(ctx context.Context, uid int64, role *biz.Role) error {
+	return r.txm.WithContext(ctx).Where("uid = ?", uid).Updates(role).Error
 }
 
 func (r *roleRepo) GetAll(ctx context.Context) ([]*biz.Role, error) {
