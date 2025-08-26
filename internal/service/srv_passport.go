@@ -29,7 +29,7 @@ type PassportService struct {
 
 	userUsecase               *biz.UserUsecase
 	menuUsecase               *biz.MenuUsecase
-	tokener                   tokener.AppToken
+	tokenizer                 tokener.AppToken
 	etcdClient                *clientv3.Client
 	applicationEventPublisher *event.ApplicationEventPublisher
 }
@@ -43,7 +43,7 @@ func NewPassportService(c *conf.Bootstrap, applicationEventPublisher *event.Appl
 		applicationEventPublisher: applicationEventPublisher,
 		userUsecase:               userUsecase,
 		menuUsecase:               menuUsecase,
-		tokener: tokener.NewTokener(
+		tokenizer: tokener.NewTokener(
 			tokener.WithTTL(time.Hour),
 			tokener.WithSecret(c.Passport.Secret),
 		),
@@ -51,7 +51,7 @@ func NewPassportService(c *conf.Bootstrap, applicationEventPublisher *event.Appl
 	}
 }
 
-// 登录
+// Login 登录
 func (s *PassportService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginReply, error) {
 	user, err := s.userUsecase.Login(ctx, req.Username, req.Password, req.AutoLogin)
 	if err != nil {
@@ -59,7 +59,7 @@ func (s *PassportService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.
 		return nil, err
 	}
 
-	token, err := s.tokener.Generate(user.ID)
+	token, err := s.tokenizer.Generate(user.UID)
 	if err != nil {
 		return nil, err
 	}
@@ -193,56 +193,34 @@ func (s *PassportService) CurrentUser(ctx context.Context, req *pb.CurrentUserRe
 		return nil, err
 	}
 
-	return &pb.CurrentUserReply{
-		User: &adminpb.UserInfo{
-			Id:        user.ID,
-			Username:  user.Username,
-			Nickname:  user.Nickname,
-			Email:     user.Email,
-			Status:    adminpb.UserStatus(user.Status),
-			CreatedAt: timestamppb.New(user.CreatedAt),
-			UpdatedAt: timestamppb.New(user.UpdatedAt),
-		},
-		Roles: lo.Map(user.Roles, func(item *biz.Role, _ int) *adminpb.RoleInfo {
-			return &adminpb.RoleInfo{
-				Id:       item.ID,
-				Name:     item.Name,
-				Describe: item.Describe,
-				Status:   int32(item.Status),
-				Permissions: lo.Map(item.Permissions, func(item *biz.RolePermission, _ int) *adminpb.RolePermission {
-					return &adminpb.RolePermission{
-						Id:         item.ID,
-						RoleId:     item.RoleID,
-						PermId:     item.PermID,
-						Name:       item.Name,
-						Actions:    lo.Map(item.Actions, fromAction),
-						DataAccess: lo.Map(item.DataAccess, fromAction),
-					}
-				}),
-			}
-		}),
-	}, nil
-}
-
-// 获取授权的菜单
-func (s *PassportService) AuthorizeMenu(ctx context.Context, req *pb.AuthorizeMenuRequest) (*pb.AuthorizeMenuReply, error) {
-	claims, _ := jwt.FromContext(ctx)
-
-	user, err := s.userUsecase.GetUser(ctx, claims.UID)
-	if err != nil {
-		return nil, err
-	}
+	roleMap := lo.Map(user.Roles, func(item *biz.Role, _ int) *adminpb.RoleInfo {
+		return &adminpb.RoleInfo{
+			Uid:      item.UID,
+			Name:     item.Name,
+			Describe: item.Describe,
+			Status:   int32(item.Status),
+			Permissions: lo.Map(item.Permissions, func(item *biz.RolePermission, _ int) *adminpb.RolePermission {
+				return &adminpb.RolePermission{
+					RoleId:     item.RoleID,
+					PermId:     item.PermID,
+					Name:       item.Name,
+					Actions:    lo.Map(item.Actions, fromAction),
+					DataAccess: lo.Map(item.DataAccess, fromAction),
+				}
+			}),
+		}
+	})
 
 	permissionMap := make(map[int64]*biz.RolePermission)
 	for _, role := range user.Roles {
 		for _, permission := range role.Permissions {
-			if last, exist := permissionMap[permission.ID]; exist {
+			if last, exist := permissionMap[permission.PermID]; exist {
 				// 合并权限
 				last.Actions = lo.Uniq(append(last.Actions, permission.Actions...))
 				last.DataAccess = lo.Uniq(append(last.DataAccess, permission.DataAccess...))
 				continue
 			}
-			permissionMap[permission.ID] = permission
+			permissionMap[permission.PermID] = permission
 		}
 	}
 
@@ -262,9 +240,24 @@ func (s *PassportService) AuthorizeMenu(ctx context.Context, req *pb.AuthorizeMe
 		return false
 	})
 
-	return &pb.AuthorizeMenuReply{
-		Data: lo.Map(userMenus, toMenuProto),
+	return &pb.CurrentUserReply{
+		User: &adminpb.UserInfo{
+			Uid:       user.UID,
+			Username:  user.Username,
+			Nickname:  user.Nickname,
+			Email:     user.Email,
+			Status:    adminpb.UserStatus(user.Status),
+			CreatedAt: timestamppb.New(user.CreatedAt),
+			UpdatedAt: timestamppb.New(user.UpdatedAt),
+		},
+		Roles:      roleMap,
+		AllowMenus: lo.Map(userMenus, toMenuProto),
 	}, nil
+}
+
+// 获取授权的菜单
+func (s *PassportService) AuthorizeMenu(ctx context.Context, req *pb.AuthorizeMenuRequest) (*pb.AuthorizeMenuReply, error) {
+	return &pb.AuthorizeMenuReply{}, nil
 }
 
 func (s *PassportService) fmtPassportCaptchaKey(uid int64) string {
